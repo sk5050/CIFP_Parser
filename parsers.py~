@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+
+import sys
+import json
+from utils import *
+
+class Parser(object):
+
+    def __init__(self):
+
+        airports_data = dict()
+
+
+
+    def parse(self,Lines):
+
+        while Lines:
+
+            sec_code = Lines[0][4]
+
+            if sec_code == "P":    # airport
+                sec_end_linum = find_end_linum(Lines,'section',sec_code)
+                self.parse_airports_sec(Lines[0:sec_end_linum])
+                Lines = Lines[sec_end_linum:]
+
+            else:
+                sec_end_linum = find_end_linum(Lines,'section',sec_code)
+                Lines = Lines[sec_end_linum:]
+
+
+        
+    def parse_airports_sec(self,Lines):
+
+        while Lines:
+
+            airport_code = Lines[0][6:10]
+
+            # if airport_code == "KBOS":
+
+            airport_end_linum = find_end_linum(Lines,'airport',airport_code)
+            self.parse_airport(Lines[0:airport_end_linum])
+
+            Lines = Lines[sec_end_linum:]
+
+
+
+    def parse_airport(self,Lines):
+
+        while Lines:
+
+            subsec_code = Lines[0][12]
+
+            subsec_end_linum = find_end_linum(Lines, 'subsec', subsec_code)
+            print(Lines)
+            print(subsec_code)
+            print(subsec_end_linum)
+            raise ValueError(123)
+            self.parse_airport_subsec(Lines[0:subsec_end_linum])
+
+            Lines = Lines[subsec_end_linum:]
+
+
+
+    def parse_airport_subsec(self,Lines):
+
+        print(Lines)
+        subsec_code = Lines[0][12]
+
+        if subsec_code == "A":
+            self.parse_airport_header(Lines)
+
+        # elif subsec_code == "D":
+        #     parse_airport_SIDs(Lines)
+
+
+
+    def parse_airport_header(self,Lines):
+        airport_code = Lines[6:10]
+        self.airport_data[airport_code] = {"NAME": name,
+                                           "CODE": airport_code,
+                                           "LATITUDE": lat,
+                                           "LONGITUDE": lon}
+
+
+        print(json.dumps(self.airport_data,sort_keys=True, indent=4))
+        raise ValueError(11)

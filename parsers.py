@@ -1,0 +1,339 @@
+#!/usr/bin/env python
+
+import sys
+import json
+from utils import *
+
+class Parser(object):
+
+    def __init__(self):
+
+        self.airports_data = dict()
+
+
+
+    def parse(self,Lines):
+
+        while Lines:
+
+            sec_code = Lines[0][4]
+
+            if sec_code == "P":    # airport
+                sec_end_linum = find_end_linum(Lines,'section',sec_code)
+                self.parse_airports_sec(Lines[0:sec_end_linum])
+                Lines = Lines[sec_end_linum:]
+
+            else:
+                sec_end_linum = find_end_linum(Lines,'section',sec_code)
+                Lines = Lines[sec_end_linum:]
+
+
+        
+    def parse_airports_sec(self,Lines):
+
+        while Lines:
+
+            airport_code = Lines[0][6:10]
+
+            airport_end_linum = find_end_linum(Lines,'airport',airport_code)
+
+            if airport_code == "KBOS":
+                self.parse_airport(Lines[0:airport_end_linum])
+
+            Lines = Lines[airport_end_linum:]
+
+
+
+    def parse_airport(self,Lines):
+
+        while Lines:
+
+            subsec_code = Lines[0][12]
+
+            subsec_end_linum = find_end_linum(Lines, 'subsec', subsec_code)
+            self.parse_airport_subsec(Lines[0:subsec_end_linum])
+
+            Lines = Lines[subsec_end_linum:]
+
+
+
+    def parse_airport_subsec(self,Lines):
+
+        subsec_code = Lines[0][12]
+
+        if subsec_code == "A":
+            self.parse_airport_header(Lines)
+
+        elif subsec_code == "C":
+            self.parse_airport_waypoints(Lines)
+
+        elif subsec_code == "D":
+            self.parse_airport_SIDs(Lines)
+
+        # elif subsec_code == "E":
+        #     self.parse_airport_STARs(Lines)
+
+        # elif subsec_code == "F":
+        #     self.parse_airport_IAPs(Lines)
+
+            
+
+        
+
+
+
+    def parse_airport_header(self,Lines):
+        airport_code = Lines[0][6:10].rstrip()
+        name = Lines[0][93:123].rstrip()
+        lat = Lines[0][32:41].rstrip()
+        lon = Lines[0][41:51].rstrip()
+
+        self.airports_data[airport_code] = {"NAME": name,
+                                           "CODE": airport_code,
+                                           "LATITUDE": lat,
+                                           "LONGITUDE": lon}
+
+
+    def parse_airport_waypoints(self,Lines):
+
+        airport_code = Lines[0][6:10].rstrip()
+
+        if "Terminal Waypoints" not in self.airports_data[airport_code]:
+            self.airports_data[airport_code]["Terminal Waypoints"] = dict()
+
+        for line in Lines:
+
+            waypoint_id = line[13:18]
+            lat = line[32:41]
+            lon = line[41:51]
+
+            self.airports_data[airport_code]["Terminal Waypoints"][waypoint_id] \
+                = {"LATITUDE": lat,
+                   "LONGITUDE": lon}
+            
+
+        
+
+    def parse_airport_SIDs(self,Lines):
+
+        airport_code = Lines[0][6:10].rstrip()
+
+
+        while Lines:
+
+            SID_id = Lines[0][13:19]
+
+            SID_end_linum = find_end_linum(Lines, 'SID', SID_id)
+            self.parse_airport_SID(Lines[0:SID_end_linum])
+
+            Lines = Lines[SID_end_linum:]
+
+
+    def parse_airport_SID(self,Lines):
+
+        SID_id = Lines[0][13:19]
+
+        while Lines:
+            transition = Lines[0][20:25]
+
+            transition_end_linum = find_end_linum(Lines, 'transition', transition)
+            self.parse_airport_SID_transition(Lines[0:transition_end_linum])
+
+            Lines = Lines[transition_end_linum:]
+
+
+    def parse_airport_SID_transition(self,Lines):
+
+        airport_code = Lines[0][6:10].rstrip()
+        SID_id = Lines[0][13:19]
+        RT_type = Lines[0][18]             
+        transition = Lines[0][20:25].rstrip()
+
+        procedure = []
+        for line in Lines:
+
+            fix = line[29:34].rstrip()
+            if fix=='':
+                fix = line[6:10]
+            path_term = line[47:49]
+            mag_crs = line[70:74]
+
+            procedure.append({'FIX':fix,
+                              'PATH TERM':path_term,
+                              'MAG CRS':mag_crs})
+
+
+        if "SID" not in self.airports_data[airport_code]:
+            self.airports_data[airport_code]["SID"] = dict()
+
+        if SID_id not in self.airports_data[airport_code]["SID"]:
+            self.airports_data[airport_code]["SID"][SID_id] = dict()
+
+        self.airports_data[airport_code]["SID"][SID_id][transition] = {"RT Type":RT_type,
+                                                                       "Procedure": procedure}
+
+
+        
+
+    # def parse_airport_SID(self,Lines):
+
+    #     SID_id = Lines[0][13:19]
+
+    #     transitions = []
+
+    #     while Lines:
+    #         transition = Lines[0][20:25]
+
+    #         transition_end_linum = find_end_linum(Lines, 'transition', transition)
+    #         transition_item = self.parse_airport_SID_transition(Lines[0:transition_end_linum])
+    #         transitions.append(transition_item)
+
+    #         Lines = Lines[transition_end_linum:]
+
+    #     return {"SID ID":SID_id, "Transition": transitions}
+
+
+    # def parse_airport_SID_transition(self,Lines):
+        
+    #     RT_type = Lines[0][18]             
+    #     transition = Lines[0][20:25].rstrip()
+
+    #     procedure = []
+    #     for line in Lines:
+
+    #         fix = line[29:34].rstrip()
+    #         if fix=='':
+    #             fix = line[6:10]
+    #         path_term = line[47:49]
+    #         mag_crs = line[70:74]
+
+    #         procedure.append({'FIX':fix,
+    #                           'PATH TERM':path_term,
+    #                           'MAG CRS':mag_crs})
+
+    #     return {"Transition ID": transition, "RT Type":RT_type, "Procedure": procedure}
+
+
+    # def parse_airport_STARs(self,Lines):
+
+    #     airport_code = Lines[0][6:10].rstrip()
+
+    #     STARs = []
+
+    #     while Lines:
+
+    #         STAR_id = Lines[0][13:19]
+
+    #         STAR_end_linum = find_end_linum(Lines, 'STAR', STAR_id)
+    #         STAR_item = self.parse_airport_STAR(Lines[0:STAR_end_linum])
+    #         STARs.append(STAR_item)
+
+    #         Lines = Lines[STAR_end_linum:]
+
+    #     self.airports_data[airport_code]["STAR"] = STARs
+
+
+
+    # def parse_airport_STAR(self,Lines):
+
+    #     STAR_id = Lines[0][13:19]
+
+    #     transitions = []
+
+    #     while Lines:
+    #         transition = Lines[0][20:25]
+
+    #         transition_end_linum = find_end_linum(Lines, 'transition', transition)
+    #         transition_item = self.parse_airport_STAR_transition(Lines[0:transition_end_linum])
+    #         transitions.append(transition_item)
+
+    #         Lines = Lines[transition_end_linum:]
+
+    #     return {"STAR ID":STAR_id, "Transition": transitions}
+
+
+    # def parse_airport_STAR_transition(self,Lines):
+        
+    #     RT_type = Lines[0][18]             
+    #     transition = Lines[0][20:25].rstrip()
+
+    #     procedure = []
+    #     for line in Lines:
+
+    #         fix = line[29:34].rstrip()
+    #         if fix=='':
+    #             fix = line[6:10]
+    #         path_term = line[47:49]
+    #         mag_crs = line[70:74]
+
+    #         procedure.append({'FIX':fix,
+    #                           'PATH TERM':path_term,
+    #                           'MAG CRS':mag_crs})
+
+    #     return {"Transition ID": transition, "RT Type":RT_type, "Procedure": procedure}
+
+
+
+    # def parse_airport_IAPs(self,Lines):
+
+    #     airport_code = Lines[0][6:10].rstrip()
+
+    #     IAPs = []
+
+    #     while Lines:
+
+    #         IAP_id = Lines[0][13:19]
+
+    #         IAP_end_linum = find_end_linum(Lines, 'IAP', IAP_id)
+    #         IAP_item = self.parse_airport_IAP(Lines[0:IAP_end_linum])
+    #         IAPs.append(IAP_item)
+
+    #         Lines = Lines[IAP_end_linum:]
+
+    #     self.airports_data[airport_code]["IAP"] = IAPs
+
+
+
+    # def parse_airport_IAP(self,Lines):
+
+    #     IAP_id = Lines[0][13:19]
+
+    #     transitions = []
+
+    #     while Lines:
+    #         transition = Lines[0][20:25]
+
+    #         transition_end_linum = find_end_linum(Lines, 'transition', transition)
+    #         transition_item = self.parse_airport_IAP_transition(Lines[0:transition_end_linum])
+    #         transitions.append(transition_item)
+
+    #         Lines = Lines[transition_end_linum:]
+
+    #     return {"IAP ID":IAP_id, "Transition": transitions}
+
+
+    # def parse_airport_IAP_transition(self,Lines):
+        
+    #     RT_type = Lines[0][18]             
+    #     transition = Lines[0][20:25].rstrip()
+
+    #     procedure = []
+    #     for line in Lines:
+
+    #         fix = line[29:34].rstrip()
+    #         if fix=='':
+    #             fix = line[6:10]
+    #         path_term = line[47:49]
+    #         mag_crs = line[70:74]
+
+    #         procedure.append({'FIX':fix,
+    #                           'PATH TERM':path_term,
+    #                           'MAG CRS':mag_crs})
+
+    #     return {"Transition ID": transition, "RT Type":RT_type, "Procedure": procedure}
+
+            
+
+
+        
+            
