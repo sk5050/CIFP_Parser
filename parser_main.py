@@ -8,12 +8,14 @@ from parsers import Parser
 if __name__ == '__main__':
 
 
-    file1 = open('CIFP/FAACIFP18', 'r')
-    Lines = file1.readlines()
+    CIFP = open('CIFP/FAACIFP18', 'r')
+    Lines = CIFP.readlines()
 
 
     parser = Parser()
 
-    parser.parse(Lines[124070:228258])
+    parser.parse(Lines[23029:228289])
 
-    print(json.dumps(parser.airports_data,sort_keys=True, indent=4))
+
+    with open('CIFP_parsed/CIFP_parsed', 'w') as outfile:
+        json.dump(parser.CIFP_parsed, outfile, sort_keys=True, indent=4)

@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+import sys
+import json
+from utils import *
+from plan_visualizer import Visualizer
+
+if __name__ == '__main__':
+
+    
+    CIFP_parsed_filename = 'CIFP_parsed/CIFP_parsed'
+    
+
+    visualizer = Visualizer(CIFP_parsed_filename)
+
+    visualizer.visualize_plan(None, lat_0=42.214660, lon_0=-71.002300, \
+                              width=1.4E6, height=1.2E6)
+
