@@ -25,78 +25,95 @@ class Visualizer(object):
 
     def visualize_plan(self,plan,lat_0,lon_0,width,height,resolution='h'):
 
-        self.plan = plan
+        self.plan = plan.augmented_plan
 
 
         self.draw_map(lat_0,lon_0,width,height,resolution=resolution)
 
-        if plan["SID"]==None:
+        self.draw_airport()
+
+        if self.plan["SID"]==None:
             available_SIDs = self.find_available_SIDs(self.plan)
         else:
-            # print(self.plan)
-            # print(self.plan["SID"]["SID_id"])
-            # print(self.plan["SID"]["transition_id"])
             self.draw_SID(airport=self.plan["origin"], SID_id=self.plan["SID"]["SID_id"],\
                           transitions=self.plan["SID"]["transitions"])
 
-        self.draw_route(self.plan["route"])
+        self.draw_route(self.plan["route graph"])
 
-        if plan["STAR"]==None:
+        if self.plan["STAR"]==None:
             available_STARs = self.find_available_STARs(self.plan)
         else:
-            self.draw_STAR(airport=self.plan["destination"], STAR_id=self.plan["STAR"]["STAR_id"],\
-                          transitions=self.plan["STAR"]["transitions"])
+            for STAR in self.plan["STAR"]:
+                print(STAR)
+                self.draw_STAR(airport=self.plan["destination"], STAR_id=STAR["STAR_id"],\
+                              transitions=STAR["transitions"])
 
-        
-        # self.draw_SID(airport='KBOS',SID_id='BLZZR4', transition_id='RW04R')
-        # self.draw_SID(airport='KBOS',SID_id='BLZZR4', transition_id='RW09')
-        # self.draw_SID(airport='KBOS',SID_id='BLZZR4', transition_id='RW15R')
-
-
-        
         plt.show()
 
 
+    def draw_airport(self):
 
-    def draw_route(self,route):
+        origin = self.plan["origin"]
+        dest = self.plan["destination"]
 
-        lat = []
-        lon = []
+        origin_coord = self.get_wp_coord(origin, airport=origin)
+        dest_coord = self.get_wp_coord(dest, airport=dest)
         
-        for element in route:
-            if element in self.cifp["Airways"]:
-                route_id = element
-                
-                route_segment = self.get_route_segment(route_id,start_waypoint,end_waypoint)
+        self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=15,alpha=0.2)
+        self.basemap.plot(dest_coord[1], dest_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=15,alpha=0.2)
 
-                for waypoint in route_segment:
-                    wp_coord = self.get_wp_coord(waypoint["FIX"])
 
-                    lat.append(wp_coord[0])
-                    lon.append(wp_coord[1])
+    def draw_route(self,route_graph):
 
-            else:
-                waypoint = element
-                
-                if waypoint==route[0]:
-                    wp_coord = self.get_wp_coord(waypoint, airport=self.plan["origin"])
-                elif waypoint==route[-1]:
-                    wp_coord = self.get_wp_coord(waypoint, airport=self.plan["destination"])
+        lat_set = []
+        lon_set = []
+
+
+        for head_waypoint, tail_waypoints in route_graph.items():
+
+            if head_waypoint == "root" or head_waypoint=="terminal":
+                continue
+
+            for tail_waypoint in tail_waypoints:
+
+                lat = []
+                lon = []
+
+                if head_waypoint==route_graph["root"]:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
+                elif head_waypoint==route_graph["terminal"]:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
                 else:
-                    wp_coord = self.get_wp_coord(waypoint)
+                    wp_coord = self.get_wp_coord(head_waypoint)
 
                 lat.append(wp_coord[0])
                 lon.append(wp_coord[1])
 
-        self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
+                if tail_waypoint==route_graph["root"]:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["origin"])
+                elif tail_waypoint==route_graph["terminal"]:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["destination"])
+                else:
+                    wp_coord = self.get_wp_coord(tail_waypoint)
+
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                lat_set.append(lat)
+                lon_set.append(lon)
+
+        for lat, lon in zip(lat_set, lon_set):
+            self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
 
 
     def draw_SID(self,airport, SID_id, transitions):
 
-        lat = []
-        lon = []
 
         for transition in transitions:
+
+            lat = []
+            lon = []
+
 
             transition_id = transition["transition_id"]
 
@@ -112,17 +129,19 @@ class Visualizer(object):
                 lon.append(wp_coord[1])
 
 
-        self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
+            self.basemap.plot(lon,lat, 'gD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
 
 
 
 
     def draw_STAR(self,airport, STAR_id, transitions):
 
-        lat = []
-        lon = []
 
         for transition in transitions:
+
+            lat = []
+            lon = []
+
 
             transition_id = transition["transition_id"]
 
@@ -137,7 +156,7 @@ class Visualizer(object):
                 lat.append(wp_coord[0])
                 lon.append(wp_coord[1])        
  
-        self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)        
+            self.basemap.plot(lon,lat, 'rD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)        
 
 
     def draw_map(self,lat_0,lon_0,width,height,resolution='h'):
@@ -153,29 +172,29 @@ class Visualizer(object):
 
 
 
-    def get_route_segment(self,route_id,start_waypoint,end_waypoint):
+    # def get_route_segment(self,route_id,start_waypoint,end_waypoint):
 
-        route = self.cifp["Airways"][route_id]
+    #     route = self.cifp["Airways"][route_id]
 
-        start_pos = -1
-        end_pos = -1
+    #     start_pos = -1
+    #     end_pos = -1
 
-        for i in range(len(route)):
+    #     for i in range(len(route)):
 
-            if route[i]["FIX"] == start_waypoint:
-                start_pos = i
-            elif route[i]["FIX"] == end_waypoint:
-                end_pos = i
+    #         if route[i]["FIX"] == start_waypoint:
+    #             start_pos = i
+    #         elif route[i]["FIX"] == end_waypoint:
+    #             end_pos = i
 
-        if start_pos < 0 or end_pos < 0:
-            raise ValueError("fix not found in the airway")
+    #     if start_pos < 0 or end_pos < 0:
+    #         raise ValueError("fix not found in the airway")
 
-        if start_pos < end_pos:
-            route_segment = route[start_pos:end_pos-1]
-        else:
-            route_segment = route[end_pos:start_pos-1].reverse()
+    #     if start_pos < end_pos:
+    #         route_segment = route[start_pos:end_pos-1]
+    #     else:
+    #         route_segment = route[end_pos:start_pos-1].reverse()
 
-        return route_segment
+    #     return route_segment
             
 
         
@@ -236,3 +255,44 @@ class Visualizer(object):
 
         
         return [lat,lon]
+
+
+    # def sort_route_graph(self,route_graph):
+
+    #     route_segments = []
+
+    #     queue = [(None,route_graph["root"])]
+
+    #     visited_list = set()
+
+    #     route_segment = []
+    #     while queue:
+
+    #         expanding_node = queue.pop()
+
+    #         if expanding_node[1] in visited_list or expanding_node[1]==route_graph["terminal"]:
+    #             route_segment.append(expanding_node[1])
+    #             route_segments.append(route_segment)
+    #             route_segment = []
+
+    #         else:
+    #             children = route_graph[expanding_node[1]]
+
+    #             for child in children:
+    #                 queue.append((expanding_node[1],child))
+
+    #             if route_segment==[]:
+    #                 if expanding_node[0]!=None:
+    #                     route_segment.append(expanding_node[0])
+    #                 route_segment.append(expanding_node[1])
+    #             else:
+    #                 route_segment.append(expanding_node[1])
+
+    #             visited_list.add(expanding_node[1])
+
+    #     for r in route_segments:
+    #         print(r)
+
+    #     raise ValueError(123)
+
+    #     return route_segments
