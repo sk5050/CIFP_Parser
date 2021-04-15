@@ -8,7 +8,16 @@ from mpl_toolkits.basemap import Basemap
 from PIL import Image
 from pylab import rcParams
 from utils import *
-
+import geopy.distance
+import numpy as np
+from plan import *
+import time
+import random
+import copy
+import shapely
+from shapely.geometry import Point, Polygon, LineString
+from descartes import PolygonPatch
+from matplotlib.collections import PatchCollection
 
 
 class Visualizer(object):
@@ -40,6 +49,9 @@ class Visualizer(object):
 
         self.draw_route(self.plan["route graph"])
 
+        if "alt route graph" in self.plan:
+            self.draw_alt_route(self.plan["alt route graph"])
+
         if self.plan["STAR"]==None:
             available_STARs = self.find_available_STARs(self.plan)
         else:
@@ -48,19 +60,39 @@ class Visualizer(object):
                 self.draw_STAR(airport=self.plan["destination"], STAR_id=STAR["STAR_id"],\
                               transitions=STAR["transitions"])
 
-        plt.show()
+
+        if "alt-STAR" in self.plan:
+            for STAR in self.plan["alt-STAR"]:
+                self.draw_STAR(airport=self.plan["alternative"], STAR_id=STAR["STAR_id"],\
+                               transitions=STAR["transitions"])
+
+                
+
+        # plt.show()
+
+        ax = plt.axes()
+
+        return ax
 
 
     def draw_airport(self):
 
         origin = self.plan["origin"]
         dest = self.plan["destination"]
+           
 
         origin_coord = self.get_wp_coord(origin, airport=origin)
         dest_coord = self.get_wp_coord(dest, airport=dest)
         
-        self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=15,alpha=0.2)
-        self.basemap.plot(dest_coord[1], dest_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=15,alpha=0.2)
+        self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=50,alpha=0.5)
+        self.basemap.plot(dest_coord[1], dest_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=50,alpha=0.5)
+
+
+        if "alternative" in self.plan:
+            alt = self.plan["alternative"]
+            alt_coord = self.get_wp_coord(alt, airport=alt)
+            self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=15,alpha=0.2)
+
 
 
     def draw_route(self,route_graph):
@@ -104,6 +136,50 @@ class Visualizer(object):
 
         for lat, lon in zip(lat_set, lon_set):
             self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
+
+
+    def draw_alt_route(self,route_graph):
+
+        lat_set = []
+        lon_set = []
+
+
+        for head_waypoint, tail_waypoints in route_graph.items():
+
+            if head_waypoint == "root" or head_waypoint=="terminal":
+                continue
+
+            for tail_waypoint in tail_waypoints:
+                print(head_waypoint)
+
+                lat = []
+                lon = []
+
+                if head_waypoint==route_graph["root"]:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
+                elif head_waypoint==route_graph["terminal"]:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["alternative"])
+                else:
+                    wp_coord = self.get_wp_coord(head_waypoint)
+
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                if tail_waypoint==route_graph["root"]:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["origin"])
+                elif tail_waypoint==route_graph["terminal"]:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["alternative"])
+                else:
+                    wp_coord = self.get_wp_coord(tail_waypoint)
+
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                lat_set.append(lat)
+                lon_set.append(lon)
+
+        for lat, lon in zip(lat_set, lon_set):
+            self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)            
 
 
     def draw_SID(self,airport, SID_id, transitions):
@@ -296,3 +372,109 @@ class Visualizer(object):
     #     raise ValueError(123)
 
     #     return route_segments
+
+
+
+
+
+    def compute_traj(self, route, step_size=0.5):
+
+        wp_lat = []
+        wp_lon = []
+        for waypoint in route:
+
+            wp_coord = self.get_wp_coord(waypoint)
+            wp_lat.append(wp_coord[0])
+            wp_lon.append(wp_coord[1])
+
+
+        traj_lat = []
+        traj_lon = []
+        for i in range(len(wp_lat)-1):
+
+            coords_1 = (wp_lat[i], wp_lon[i])
+            coords_2 = (wp_lat[i+1], wp_lon[i+1])
+            dist = geopy.distance.distance(coords_1, coords_2).nm
+
+            num_steps = dist / step_size
+
+            traj_lat_temp = list(np.linspace(coords_1[0], coords_2[0], num_steps))
+            traj_lon_temp = list(np.linspace(coords_1[1], coords_2[1], num_steps))
+
+            traj_lat.extend(traj_lat_temp)
+            traj_lon.extend(traj_lon_temp)
+
+        return traj_lat, traj_lon
+
+
+    def compute_weather_traj(self, weather_cell, num_steps=1000):
+
+        weather_traj = [weather_cell]
+
+        for i in range(num_steps):
+
+            new_weather_cell = copy.deepcopy(weather_traj[-1])
+
+            for coords in new_weather_cell:
+
+                coords[0] += 0.01
+                coords[0] += 0.0
+
+            weather_traj.append(new_weather_cell)
+
+        return weather_traj
+
+
+    def simulate(self, plan, route, weather_cell=None, zoom=False):
+
+        ax = self.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
+                              width=7E6, height=3E6)
+            
+
+
+        traj_lat, traj_lon = self.compute_traj(route)
+
+
+        if weather_cell!=None:
+            weather_traj = self.compute_weather_traj(weather_cell)
+
+        
+
+        for lat,lon,weather_traj_cell in zip(traj_lat,traj_lon,weather_traj):
+
+            x,y = self.basemap(lon,lat)
+            print(x,y)
+
+            traj_history = self.basemap.plot(lon,lat, 'b*',latlon=True,linewidth=5,MarkerSize=20)
+
+            if weather_cell!=None:
+
+                lons = [x[0] for x in weather_traj_cell]
+                lats = [x[1] for x in weather_traj_cell]
+                mlons,mlats = self.basemap(lons,lats)
+                cell = [[x,y] for x,y in zip(mlons,mlats)]
+                print(cell)
+                p = Polygon(cell)
+                pp = PolygonPatch(p, fc='red', ec='black', alpha=0.4)
+                weather_traj_history = ax.add_patch(pp)
+
+            ref_x,ref_y = self.basemap(lon,lat)
+            xbound = [ref_x-600000, ref_x+300000]
+            ybound = [ref_y-300000, ref_y+300000]
+            if zoom==True:
+                ax.set_xlim(xbound)
+                ax.set_ylim(ybound)
+
+            plt.show(block=False)
+
+            plt.pause(0.1)
+
+            traj_history[0].remove()
+
+            if weather_cell!=None:
+                weather_traj_history.remove()
+
+            # filename = str(k)
+            # filename = "0"*(5 - len(filename)) + filename
+            # plt.savefig('img/img'+filename+'.png')
+

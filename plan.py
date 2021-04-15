@@ -53,7 +53,40 @@ class Plan(object):
         self.augmented_plan["route graph"]["root"] = routes[0][0]
         self.augmented_plan["route graph"]["terminal"] = routes[0][-1]
 
-        print(route_graph)
+
+
+        
+        if "alt-routes" in self.plan:
+            alt_routes = self.plan["alt-routes"]
+            alt_route_graph = dict()
+
+            for route in alt_routes:
+
+                expanded_route = []
+                for i in range(len(route)):
+                    if route[i] in self.cifp["Airways"]:
+                        route_segment = self.get_route_segment(route[i], route[i-1], route[i+1])
+                        expanded_route.extend(route_segment)
+                    else:
+                        expanded_route.append(route[i])
+
+                for i in range(len(expanded_route)-1):
+                    if expanded_route[i] in alt_route_graph:
+                        alt_route_graph[expanded_route[i]].append(expanded_route[i+1])
+                    else:
+                        alt_route_graph[expanded_route[i]] = [expanded_route[i+1]]
+
+
+            new_route_graph = dict()
+            for key,value in alt_route_graph.items():
+                new_route_graph[key] = list(set(value))
+
+            route_graph = new_route_graph
+
+            self.augmented_plan["alt route graph"] = alt_route_graph
+
+            self.augmented_plan["alt route graph"]["root"] = alt_routes[0][0]
+            self.augmented_plan["alt route graph"]["terminal"] = alt_routes[0][-1]
 
 
 

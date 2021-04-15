@@ -55,15 +55,25 @@ if __name__ == '__main__':
             "STAR":[{"STAR_id":"ANJLL4",
                      "transitions":[{"transition_id":"HAKMN"}, {"transition_id":"ALL"}]},
                      {"STAR_id":"BIGBR3",
-                      "transitions":[{"transition_id":"HAKMN"}, {"transition_id":""}, {"transition_id":"RW06B"}]}]
+                      "transitions":[{"transition_id":"HAKMN"}, {"transition_id":""}, {"transition_id":"RW06B"}]}],
 
 
+            "alternative":"KLGB",
+            "alt-STAR":[{"STAR_id":"BAUBB2",
+                         "transitions":[{"transition_id":""}, {"transition_id":"TILLT"},{"transition_id":"RW12"},{"transition_id":"RW26R"},{"transition_id":"RW30"}]}],
+
+            "alt-routes":[["PROMT", "TILLT"]]
 
             }
 
+
+
+
+    
+
     print(json.dumps(plan, sort_keys=True, indent=4))
 
-    raise ValueError(123)
+    # raise ValueError(123)
 
     plan = Plan(plan,CIFP_parsed_filename)
     print(json.dumps(plan.augmented_plan, sort_keys=True, indent=4))
