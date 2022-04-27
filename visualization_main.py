@@ -83,18 +83,21 @@ if __name__ == '__main__':
                        ["BUZRD", "SEY", "HTO", "J174", "ORF", "J121", "CHS", "IGARY", "Q85", "LPERD"],
                        ["BUZRD", "SEY", "HTO", "RIFLE", "J174", "SWL", "CEBEE", "WETRO", "ILM", "AR15", "HIBAC"]
                        ],
+            
             "STAR":[{"STAR_id":"SNFLD1",
                      "transitions":[{"transition_id":""}]},
                      {"STAR_id":"ALYNA1",
                       "transitions":[{"transition_id":"BEAUX"}]}],
 
 
-            "alternative":"KJFK",
-            "alt-STAR":[{"STAR_id":"CAMRN4",
-                         "transitions":[{"transition_id":"ALL"}]}],
-
-            # "alt-routes":[["PROMT", "TILLT"]]
-            
+            "alternatives": [{"alt-airport" : "KJFK",
+                              "alt-routes" : [["SLOJO", "CAMRN"]],
+                              "alt-STAR" : [{"STAR_id":"CAMRN4",
+                                             "transitions":[{"transition_id":"ALL"}]}]},
+                             {"alt-airport" : "KCLT",
+                              "alt-routes" : [["CEBEE", "MAJIC"]],
+                              "alt-STAR" : [{"STAR_id":"MAJIC4",
+                                             "transitions":[{"transition_id":"LIB"}]}]}]
 
             }
 
@@ -116,5 +119,5 @@ if __name__ == '__main__':
     # visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-71.002300, \
     #                           width=1.4E6, height=0.4E6)
 
-    visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
-                              width=7E6, height=3E6, show=True)
+    # visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
+    #                           width=7E6, height=3E6, show=True)

@@ -54,75 +54,111 @@ class Plan(object):
         self.augmented_plan["route graph"]["terminal"] = routes[0][-1]
 
 
+        if "alternatives" in self.plan:
+            self.augmented_plan["alternatives"]["alt routes"] = []
+            
+            for alternative in self.plan["alterantive"]:
+                alt_airport = alternative["alt-airport"]
+                alt_routes = alternative["alt-routes"]
+                alt_route_graph = dict()
+
+                for route in alt_routes:
+
+                    expanded_route = []
+                    for i in range(len(route)):
+                        if route[i] in self.cifp["Airways"]:
+                            route_segment = self.get_route_segment(route[i], route[i-1], route[i+1])
+                            expanded_route.extend(route_segment)
+                        else:
+                            expanded_route.append(route[i])
+
+                    for i in range(len(expanded_route)-1):
+                        if expanded_route[i] in alt_route_graph:
+                            alt_route_graph[expanded_route[i]].append(expanded_route[i+1])
+                        else:
+                            alt_route_graph[expanded_route[i]] = [expanded_route[i+1]]
+
+
+                new_route_graph = dict()
+                for key,value in alt_route_graph.items():
+                    new_route_graph[key] = list(set(value))
+
+                alt_route_graph = new_route_graph
+
+                self.augmented_plan["alternatives"]["alt routes"].append[{"route graph": alt_route_graph,
+                                                                          "root": alt_routes[0][0],
+                                                                          "terminal": alt_routes[0][-1],
+                                                                          "STAR": alternative["alt-STAR"]}]
+                
 
         
-        if "alt-routes" in self.plan:
-            alt_routes = self.plan["alt-routes"]
-            alt_route_graph = dict()
+        # if "alt-routes" in self.plan:
+        #     alt_routes = self.plan["alt-routes"]
+        #     alt_route_graph = dict()
 
-            for route in alt_routes:
+        #     for route in alt_routes:
 
-                expanded_route = []
-                for i in range(len(route)):
-                    if route[i] in self.cifp["Airways"]:
-                        route_segment = self.get_route_segment(route[i], route[i-1], route[i+1])
-                        expanded_route.extend(route_segment)
-                    else:
-                        expanded_route.append(route[i])
+        #         expanded_route = []
+        #         for i in range(len(route)):
+        #             if route[i] in self.cifp["Airways"]:
+        #                 route_segment = self.get_route_segment(route[i], route[i-1], route[i+1])
+        #                 expanded_route.extend(route_segment)
+        #             else:
+        #                 expanded_route.append(route[i])
 
-                for i in range(len(expanded_route)-1):
-                    if expanded_route[i] in alt_route_graph:
-                        alt_route_graph[expanded_route[i]].append(expanded_route[i+1])
-                    else:
-                        alt_route_graph[expanded_route[i]] = [expanded_route[i+1]]
-
-
-            new_route_graph = dict()
-            for key,value in alt_route_graph.items():
-                new_route_graph[key] = list(set(value))
-
-            alt_route_graph = new_route_graph
-
-            self.augmented_plan["alt route graph"] = alt_route_graph
-
-            self.augmented_plan["alt route graph"]["root"] = alt_routes[0][0]
-            self.augmented_plan["alt route graph"]["terminal"] = alt_routes[0][-1]
+        #         for i in range(len(expanded_route)-1):
+        #             if expanded_route[i] in alt_route_graph:
+        #                 alt_route_graph[expanded_route[i]].append(expanded_route[i+1])
+        #             else:
+        #                 alt_route_graph[expanded_route[i]] = [expanded_route[i+1]]
 
 
+        #     new_route_graph = dict()
+        #     for key,value in alt_route_graph.items():
+        #         new_route_graph[key] = list(set(value))
+
+        #     alt_route_graph = new_route_graph
+
+        #     self.augmented_plan["alt route graph"] = alt_route_graph
+
+        #     self.augmented_plan["alt route graph"]["root"] = alt_routes[0][0]
+        #     self.augmented_plan["alt route graph"]["terminal"] = alt_routes[0][-1]
 
 
 
-        if "alt-routes-2" in self.plan:
-            alt_routes_2 = self.plan["alt-routes-2"]
-            alt_route_2_graph = dict()
-
-            for route in alt_routes_2:
-
-                expanded_route = []
-                for i in range(len(route)):
-                    if route[i] in self.cifp["Airways"]:
-                        route_segment = self.get_route_segment(route[i], route[i-1], route[i+1])
-                        expanded_route.extend(route_segment)
-                    else:
-                        expanded_route.append(route[i])
-
-                for i in range(len(expanded_route)-1):
-                    if expanded_route[i] in alt_route_2_graph:
-                        alt_route_2_graph[expanded_route[i]].append(expanded_route[i+1])
-                    else:
-                        alt_route_2_graph[expanded_route[i]] = [expanded_route[i+1]]
 
 
-            new_route_graph = dict()
-            for key,value in alt_route_2_graph.items():
-                new_route_graph[key] = list(set(value))
+        # if "alt-routes-2" in self.plan:
+        #     alt_routes_2 = self.plan["alt-routes-2"]
+        #     alt_route_2_graph = dict()
 
-            alt_route_2_graph = new_route_graph
+        #     for route in alt_routes_2:
 
-            self.augmented_plan["alt route 2 graph"] = alt_route_2_graph
+        #         expanded_route = []
+        #         for i in range(len(route)):
+        #             if route[i] in self.cifp["Airways"]:
+        #                 route_segment = self.get_route_segment(route[i], route[i-1], route[i+1])
+        #                 expanded_route.extend(route_segment)
+        #             else:
+        #                 expanded_route.append(route[i])
 
-            self.augmented_plan["alt route 2 graph"]["root"] = alt_routes_2[0][0]
-            self.augmented_plan["alt route 2 graph"]["terminal"] = alt_routes_2[0][-1]
+        #         for i in range(len(expanded_route)-1):
+        #             if expanded_route[i] in alt_route_2_graph:
+        #                 alt_route_2_graph[expanded_route[i]].append(expanded_route[i+1])
+        #             else:
+        #                 alt_route_2_graph[expanded_route[i]] = [expanded_route[i+1]]
+
+
+        #     new_route_graph = dict()
+        #     for key,value in alt_route_2_graph.items():
+        #         new_route_graph[key] = list(set(value))
+
+        #     alt_route_2_graph = new_route_graph
+
+        #     self.augmented_plan["alt route 2 graph"] = alt_route_2_graph
+
+        #     self.augmented_plan["alt route 2 graph"]["root"] = alt_routes_2[0][0]
+        #     self.augmented_plan["alt route 2 graph"]["terminal"] = alt_routes_2[0][-1]
 
             
 
