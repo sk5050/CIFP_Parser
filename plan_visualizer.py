@@ -53,11 +53,16 @@ class Visualizer(object):
 
         self.draw_route(self.plan["route graph"])
 
-        if "alt route graph" in self.plan:
-            self.draw_alt_route(self.plan["alt route graph"],style='kD-')
 
-        if "alt route 2 graph" in self.plan:
-            self.draw_alt_route(self.plan["alt route 2 graph"])
+        if "alternatives" in self.plan:
+            for alternative in self.plan["alternatives"]:
+                self.draw_alternatives(alternative)
+
+        # if "alt route graph" in self.plan:
+        #     self.draw_alt_route(self.plan["alt route graph"],style='kD-')
+
+        # if "alt route 2 graph" in self.plan:
+        #     self.draw_alt_route(self.plan["alt route 2 graph"])
             
         if "planned route graph" in self.plan:
             self.draw_route(self.plan["planned route graph"],style='bD-',alpha_val=0.8)
@@ -71,10 +76,7 @@ class Visualizer(object):
                               transitions=STAR["transitions"])
 
 
-        if "alt-STAR" in self.plan:
-            for STAR in self.plan["alt-STAR"]:
-                self.draw_STAR(airport=self.plan["alternative"], STAR_id=STAR["STAR_id"],\
-                               transitions=STAR["transitions"])
+        
 
                 
 
@@ -153,7 +155,23 @@ class Visualizer(object):
             self.basemap.plot(lon,lat, style,latlon=True,linewidth=5,MarkerSize=10,alpha=alpha_val)
 
 
-    def draw_alt_route(self,route_graph,style='gD-'):
+
+
+    def draw_alternatives(self, alternative):
+
+        alt_airport = alternative["airport"]
+
+        self.draw_alt_route(alt_airport, alternative["route graph"])
+        
+        if "STAR" in alternative:
+            for STAR in alternative["STAR"]:
+                self.draw_STAR(airport=alternative["airport"], STAR_id=STAR["STAR_id"],\
+                               transitions=STAR["transitions"])
+
+
+                
+
+    def draw_alt_route(self,alt_airport, route_graph,style='gD-'):
 
         lat_set = []
         lon_set = []
@@ -179,7 +197,7 @@ class Visualizer(object):
 
                 wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
                 if wp_coord ==None:
-                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["alternative"])
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=alt_airport)
                 if wp_coord ==None:
                     wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
                 if wp_coord ==None:
@@ -199,7 +217,7 @@ class Visualizer(object):
 
                 wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["destination"])
                 if wp_coord ==None:
-                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["alternative"])
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=alt_airport)
                 if wp_coord ==None:
                     wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["origin"])
                 if wp_coord ==None:
@@ -578,3 +596,7 @@ class Visualizer(object):
                 weather_traj_history.remove()
 
 
+
+
+
+                

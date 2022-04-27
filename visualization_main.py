@@ -85,9 +85,9 @@ if __name__ == '__main__':
                        ],
             
             "STAR":[{"STAR_id":"SNFLD1",
-                     "transitions":[{"transition_id":""}]},
+                     "transitions":[{"transition_id":"LPERD"}]},
                      {"STAR_id":"ALYNA1",
-                      "transitions":[{"transition_id":"BEAUX"}]}],
+                      "transitions":[{"transition_id":"HIBAC"}]}],
 
 
             "alternatives": [{"alt-airport" : "KJFK",
@@ -97,7 +97,21 @@ if __name__ == '__main__':
                              {"alt-airport" : "KCLT",
                               "alt-routes" : [["CEBEE", "MAJIC"]],
                               "alt-STAR" : [{"STAR_id":"MAJIC4",
-                                             "transitions":[{"transition_id":"LIB"}]}]}]
+                                             "transitions":[{"transition_id":"LIB"}]}]},
+                             {"alt-airport" : "KPHL",
+                              "alt-routes" : [["CEBEE", "JST"]],
+                              "alt-STAR" : [{"STAR_id":"BOJID2",
+                                             "transitions":[{"transition_id":"JST"}]}]},
+                             {"alt-airport" : "KIAD",
+                              "alt-routes" : [["CEBEE", "DORRN"]],
+                              "alt-STAR" : [{"STAR_id":"CAVLR4",
+                                             "transitions":[{"transition_id":"DORRN"}]}]}
+                             # {"alt-airport" : "KALT",
+                             #  "alt-routes" : [["CEBEE", "MAJIC"]],
+                             #  "alt-STAR" : [{"STAR_id":"MAJIC4",
+                             #                 "transitions":[{"transition_id":"LIB"}]}]}
+
+                             ]
 
             }
 
@@ -119,5 +133,5 @@ if __name__ == '__main__':
     # visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-71.002300, \
     #                           width=1.4E6, height=0.4E6)
 
-    # visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
-    #                           width=7E6, height=3E6, show=True)
+    visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
+                              width=7E6, height=3E6, show=True)
