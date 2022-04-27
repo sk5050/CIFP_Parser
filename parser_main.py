@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     parser = Parser()
 
-    parser.parse(Lines[23029:232000])
+    parser.parse(Lines[23029:296000])
 
 
     with open('CIFP_parsed/CIFP_parsed', 'w') as outfile:

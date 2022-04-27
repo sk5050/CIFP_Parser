@@ -43,26 +43,58 @@ if __name__ == '__main__':
 
 
 
+    # plan = {"origin":"KBOS",
+    #         "destination":"KLAX",
+    #         "SID":{"SID_id":"HYLND5",
+    #                "transitions":[{"transition_id":"RW04R"}, {"transition_id":"RW09"}, {"transition_id":"RW15R"}, {"transition_id":"RW22L"}, {"transition_id":"RW33L"}]},
+    #         "routes": [
+    #             ["HYLND", "CAM", "GOATR", "WOZEE", "Q935", "HOCKE", "GRB", "RST", "ONL", "CYS", "EKR", "HVE", "PROMT", "Q88", "HAKMN"],
+    #                    ["HYLND", "HANAA", "Q816", "HOCKE", "Q935", "MONEE", "DABJU", "MCW", "SNY", "KD57S", "HVE", "GARDD", "Q88", "ZZYZX", "Q73", "HAKMN"],
+    #                    ["HYLND", "HANAA", "Q816", "HOCKE", "Q935", "MONEE", "DABJU", "MCW", "J148", "CYS", "HVE", "GARDD", "Q88", "ZZYZX", "Q73", "HAKMN"]
+    #                    ],
+    #         "STAR":[{"STAR_id":"ANJLL4",
+    #                  "transitions":[{"transition_id":"HAKMN"}, {"transition_id":"ALL"}]},
+    #                  {"STAR_id":"BIGBR3",
+    #                   "transitions":[{"transition_id":"HAKMN"}, {"transition_id":""}, {"transition_id":"RW06B"}]}],
+
+
+    #         "alternative":"KLGB",
+    #         "alt-STAR":[{"STAR_id":"BAUBB2",
+    #                      "transitions":[{"transition_id":""}, {"transition_id":"TILLT"},{"transition_id":"RW12"},{"transition_id":"RW26R"},{"transition_id":"RW30"}]}],
+
+    #         "alt-routes":[["PROMT", "TILLT"]]
+            
+
+    #         }
+
+  
+
+
     plan = {"origin":"KBOS",
-            "destination":"KLAX",
-            "SID":{"SID_id":"HYLND5",
-                   "transitions":[{"transition_id":"RW04R"}, {"transition_id":"RW09"}, {"transition_id":"RW15R"}, {"transition_id":"RW22L"}, {"transition_id":"RW33L"}]},
+            "destination":"KMCO",
+            "SID":[{"SID_id":"PATSS6",
+                    "transitions":[{"transition_id":"RW04R"}]},
+                   {"SID_id":"SSOXS6",
+                    "transitions":[{"transition_id":"RW04R"}]}],
+
+            
             "routes": [
-                ["HYLND", "CAM", "GOATR", "WOZEE", "Q935", "HOCKE", "GRB", "RST", "ONL", "CYS", "EKR", "HVE", "PROMT", "Q88", "HAKMN"],
-                       ["HYLND", "HANAA", "Q816", "HOCKE", "Q935", "MONEE", "DABJU", "MCW", "SNY", "KD57S", "HVE", "GARDD", "Q88", "ZZYZX", "Q73", "HAKMN"],
-                       ["HYLND", "HANAA", "Q816", "HOCKE", "Q935", "MONEE", "DABJU", "MCW", "J148", "CYS", "HVE", "GARDD", "Q88", "ZZYZX", "Q73", "HAKMN"]
+                ["PATSS", "NELIE", "BIZEX", "Q75", "SLOJO", "Q83", "ROYCO", "Q85", "LPERD"],
+                       ["BUZRD", "SEY", "HTO", "J174", "ORF", "J121", "CHS", "IGARY", "Q85", "LPERD"],
+                       ["BUZRD", "SEY", "HTO", "RIFLE", "J174", "SWL", "CEBEE", "WETRO", "ILM", "AR15", "HIBAC"]
                        ],
-            "STAR":[{"STAR_id":"ANJLL4",
-                     "transitions":[{"transition_id":"HAKMN"}, {"transition_id":"ALL"}]},
-                     {"STAR_id":"BIGBR3",
-                      "transitions":[{"transition_id":"HAKMN"}, {"transition_id":""}, {"transition_id":"RW06B"}]}],
+            "STAR":[{"STAR_id":"SNFLD1",
+                     "transitions":[{"transition_id":""}]},
+                     {"STAR_id":"ALYNA1",
+                      "transitions":[{"transition_id":"BEAUX"}]}],
 
 
-            "alternative":"KLGB",
-            "alt-STAR":[{"STAR_id":"BAUBB2",
-                         "transitions":[{"transition_id":""}, {"transition_id":"TILLT"},{"transition_id":"RW12"},{"transition_id":"RW26R"},{"transition_id":"RW30"}]}],
+            "alternative":"KJFK",
+            "alt-STAR":[{"STAR_id":"CAMRN4",
+                         "transitions":[{"transition_id":"ALL"}]}],
 
-            "alt-routes":[["PROMT", "TILLT"]]
+            # "alt-routes":[["PROMT", "TILLT"]]
+            
 
             }
 
@@ -85,4 +117,4 @@ if __name__ == '__main__':
     #                           width=1.4E6, height=0.4E6)
 
     visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
-                              width=7E6, height=3E6)
+                              width=7E6, height=3E6, show=True)

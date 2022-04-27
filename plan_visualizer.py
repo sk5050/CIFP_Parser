@@ -32,7 +32,7 @@ class Visualizer(object):
         
 
 
-    def visualize_plan(self,plan,lat_0,lon_0,width,height,resolution='h'):
+    def visualize_plan(self,plan,lat_0,lon_0,width,height,resolution='h',show=False):
 
         self.plan = plan.augmented_plan
 
@@ -44,13 +44,23 @@ class Visualizer(object):
         if self.plan["SID"]==None:
             available_SIDs = self.find_available_SIDs(self.plan)
         else:
-            self.draw_SID(airport=self.plan["origin"], SID_id=self.plan["SID"]["SID_id"],\
-                          transitions=self.plan["SID"]["transitions"])
+            for SID in self.plan["SID"]:
+                self.draw_SID(airport=self.plan["origin"], SID_id=SID["SID_id"],\
+                              transitions=SID["transitions"])
+            
+            # self.draw_SID(airport=self.plan["origin"], SID_id=self.plan["SID"]["SID_id"],\
+            #               transitions=self.plan["SID"]["transitions"])
 
         self.draw_route(self.plan["route graph"])
 
         if "alt route graph" in self.plan:
-            self.draw_alt_route(self.plan["alt route graph"])
+            self.draw_alt_route(self.plan["alt route graph"],style='kD-')
+
+        if "alt route 2 graph" in self.plan:
+            self.draw_alt_route(self.plan["alt route 2 graph"])
+            
+        if "planned route graph" in self.plan:
+            self.draw_route(self.plan["planned route graph"],style='bD-',alpha_val=0.8)
 
         if self.plan["STAR"]==None:
             available_STARs = self.find_available_STARs(self.plan)
@@ -68,9 +78,12 @@ class Visualizer(object):
 
                 
 
-        # plt.show()
+        if show==True:
+            plt.show()
 
         ax = plt.axes()
+
+        
 
         return ax
 
@@ -84,18 +97,18 @@ class Visualizer(object):
         origin_coord = self.get_wp_coord(origin, airport=origin)
         dest_coord = self.get_wp_coord(dest, airport=dest)
         
-        self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=50,alpha=0.5)
-        self.basemap.plot(dest_coord[1], dest_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=50,alpha=0.5)
+        self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=10,alpha=0.8)
+        self.basemap.plot(dest_coord[1], dest_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=10,alpha=0.8)
 
 
         if "alternative" in self.plan:
             alt = self.plan["alternative"]
             alt_coord = self.get_wp_coord(alt, airport=alt)
-            self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=15,alpha=0.2)
+            self.basemap.plot(origin_coord[1], origin_coord[0], 'y*',latlon=True,linewidth=5,MarkerSize=10,alpha=0.5)
 
 
 
-    def draw_route(self,route_graph):
+    def draw_route(self,route_graph,style='kD-',alpha_val=0.4):
 
         lat_set = []
         lon_set = []
@@ -107,6 +120,115 @@ class Visualizer(object):
                 continue
 
             for tail_waypoint in tail_waypoints:
+
+                lat = []
+                lon = []
+
+                if head_waypoint==route_graph["root"]:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
+                elif head_waypoint==route_graph["terminal"]:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
+                else:
+                    wp_coord = self.get_wp_coord(head_waypoint)
+
+                print(head_waypoint)
+                print(tail_waypoints)
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                if tail_waypoint==route_graph["root"]:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["origin"])
+                elif tail_waypoint==route_graph["terminal"]:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["destination"])
+                else:
+                    wp_coord = self.get_wp_coord(tail_waypoint)
+
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                lat_set.append(lat)
+                lon_set.append(lon)
+
+        for lat, lon in zip(lat_set, lon_set):
+            self.basemap.plot(lon,lat, style,latlon=True,linewidth=5,MarkerSize=10,alpha=alpha_val)
+
+
+    def draw_alt_route(self,route_graph,style='gD-'):
+
+        lat_set = []
+        lon_set = []
+
+
+        for head_waypoint, tail_waypoints in route_graph.items():
+
+            if head_waypoint == "root" or head_waypoint=="terminal":
+                continue
+
+            for tail_waypoint in tail_waypoints:
+                print(head_waypoint)
+
+                lat = []
+                lon = []
+
+                # if head_waypoint==route_graph["root"]:
+                #     wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
+                # elif head_waypoint==route_graph["terminal"]:
+                #     wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["alternative"])
+                # else:
+                #     wp_coord = self.get_wp_coord(head_waypoint)
+
+                wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
+                if wp_coord ==None:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["alternative"])
+                if wp_coord ==None:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
+                if wp_coord ==None:
+                    wp_coord = self.get_wp_coord(head_waypoint)
+
+                
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                # if tail_waypoint==route_graph["root"]:
+                #     wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["destination"])
+                # elif tail_waypoint==route_graph["terminal"]:
+                #     wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["alternative"])
+                # else:
+                #     wp_coord = self.get_wp_coord(tail_waypoint)
+
+
+                wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["destination"])
+                if wp_coord ==None:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["alternative"])
+                if wp_coord ==None:
+                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["origin"])
+                if wp_coord ==None:
+                    wp_coord = self.get_wp_coord(tail_waypoint)                
+
+                lat.append(wp_coord[0])
+                lon.append(wp_coord[1])
+
+                lat_set.append(lat)
+                lon_set.append(lon)
+
+        for lat, lon in zip(lat_set, lon_set):
+            self.basemap.plot(lon,lat, style,latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
+
+
+
+    def draw_planned_route(self,route_graph):
+
+        lat_set = []
+        lon_set = []
+
+
+        for head_waypoint, tail_waypoints in route_graph.items():
+
+            if head_waypoint == "root" or head_waypoint=="terminal":
+                continue
+
+            for tail_waypoint in tail_waypoints:
+                print(head_waypoint)
 
                 lat = []
                 lon = []
@@ -135,51 +257,7 @@ class Visualizer(object):
                 lon_set.append(lon)
 
         for lat, lon in zip(lat_set, lon_set):
-            self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
-
-
-    def draw_alt_route(self,route_graph):
-
-        lat_set = []
-        lon_set = []
-
-
-        for head_waypoint, tail_waypoints in route_graph.items():
-
-            if head_waypoint == "root" or head_waypoint=="terminal":
-                continue
-
-            for tail_waypoint in tail_waypoints:
-                print(head_waypoint)
-
-                lat = []
-                lon = []
-
-                if head_waypoint==route_graph["root"]:
-                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
-                elif head_waypoint==route_graph["terminal"]:
-                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["alternative"])
-                else:
-                    wp_coord = self.get_wp_coord(head_waypoint)
-
-                lat.append(wp_coord[0])
-                lon.append(wp_coord[1])
-
-                if tail_waypoint==route_graph["root"]:
-                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["origin"])
-                elif tail_waypoint==route_graph["terminal"]:
-                    wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["alternative"])
-                else:
-                    wp_coord = self.get_wp_coord(tail_waypoint)
-
-                lat.append(wp_coord[0])
-                lon.append(wp_coord[1])
-
-                lat_set.append(lat)
-                lon_set.append(lon)
-
-        for lat, lon in zip(lat_set, lon_set):
-            self.basemap.plot(lon,lat, 'kD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)            
+            self.basemap.plot(lon,lat, 'rD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.2)            
 
 
     def draw_SID(self,airport, SID_id, transitions):
@@ -237,6 +315,8 @@ class Visualizer(object):
 
     def draw_map(self,lat_0,lon_0,width,height,resolution='h'):
 
+        plt.figure(figsize=(20, 15))
+
         self.basemap = Basemap(projection='lcc', resolution=resolution, 
                                lat_0=lat_0, lon_0=lon_0,
                                width=width, height=height)
@@ -286,8 +366,9 @@ class Visualizer(object):
                 lon_str = self.cifp['NDB'][wp_name]['LONGITUDE']
 
             else:
-                print(wp_name)
-                raise ValueError("Waypoint not found.")
+                return None
+                # print(wp_name)
+                # raise ValueError("Waypoint not found.")
                     
 
         else:
@@ -311,8 +392,9 @@ class Visualizer(object):
                     lon_str = self.cifp['Airport'][airport]['Terminal Waypoints'][wp_name]['LONGITUDE']
 
                 else:
-                    print(wp_name)
-                    raise ValueError("Waypoint not found.")
+                    return None
+                    # print(wp_name)
+                    # raise ValueError("Waypoint not found.")
 
 
         lat = float(lat_str[1:3]) + float(lat_str[3:5])/60 + float(lat_str[5:])/360000
@@ -329,7 +411,6 @@ class Visualizer(object):
         if lon_dir=="W":
             lon = -lon
 
-        
         return [lat,lon]
 
 
@@ -377,15 +458,20 @@ class Visualizer(object):
 
 
 
-    def compute_traj(self, route, step_size=0.5):
+    def compute_traj(self, route, step_size=2):
 
         wp_lat = []
         wp_lon = []
         for waypoint in route:
 
-            wp_coord = self.get_wp_coord(waypoint)
-            wp_lat.append(wp_coord[0])
-            wp_lon.append(wp_coord[1])
+            if type(waypoint)==str:
+                wp_coord = self.get_wp_coord(waypoint)
+                wp_lat.append(wp_coord[0])
+                wp_lon.append(wp_coord[1])
+
+            else:
+                wp_lat.append(waypoint[1])
+                wp_lon.append(waypoint[0])
 
 
         traj_lat = []
@@ -417,19 +503,28 @@ class Visualizer(object):
 
             for coords in new_weather_cell:
 
-                coords[0] += 0.01
-                coords[0] += 0.0
+                coords[0] += 0.01*0.15
+                coords[0] += 0.05*0.15
 
             weather_traj.append(new_weather_cell)
 
         return weather_traj
 
 
-    def simulate(self, plan, route, weather_cell=None, zoom=False):
+    def simulate(self, plan, route, weather_cell=None, zoom=False,zoom_size=[-1500000,500000,-1000000,500000],save_img=False,temp_route=None):
 
-        ax = self.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
+        ax = self.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300,\
                               width=7E6, height=3E6)
-            
+
+
+        if temp_route!=None:
+            lons = [x[0] for x in temp_route]
+            lats = [x[1] for x in temp_route]
+            mlons,mlats = self.basemap(lons,lats)
+
+            for i in range(len(lons)-1):
+                self.basemap.plot([lons[i],lons[i+1]],[lats[i],lats[i+1]], 'gD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.2)            
+                
 
 
         traj_lat, traj_lon = self.compute_traj(route)
@@ -438,14 +533,16 @@ class Visualizer(object):
         if weather_cell!=None:
             weather_traj = self.compute_weather_traj(weather_cell)
 
-        
+
+        k=0
 
         for lat,lon,weather_traj_cell in zip(traj_lat,traj_lon,weather_traj):
 
-            x,y = self.basemap(lon,lat)
-            print(x,y)
+            print(lon, lat)
 
-            traj_history = self.basemap.plot(lon,lat, 'b*',latlon=True,linewidth=5,MarkerSize=20)
+            x,y = self.basemap(lon,lat)
+
+            traj_history = self.basemap.plot(lon,lat, 'go',latlon=True,linewidth=5,MarkerSize=15)
 
             if weather_cell!=None:
 
@@ -453,19 +550,25 @@ class Visualizer(object):
                 lats = [x[1] for x in weather_traj_cell]
                 mlons,mlats = self.basemap(lons,lats)
                 cell = [[x,y] for x,y in zip(mlons,mlats)]
-                print(cell)
                 p = Polygon(cell)
                 pp = PolygonPatch(p, fc='red', ec='black', alpha=0.4)
                 weather_traj_history = ax.add_patch(pp)
 
             ref_x,ref_y = self.basemap(lon,lat)
-            xbound = [ref_x-600000, ref_x+300000]
-            ybound = [ref_y-300000, ref_y+300000]
+            xbound = [ref_x+zoom_size[0], ref_x+zoom_size[1]]
+            ybound = [ref_y+zoom_size[2], ref_y+zoom_size[3]]
             if zoom==True:
                 ax.set_xlim(xbound)
                 ax.set_ylim(ybound)
 
             plt.show(block=False)
+
+            if save_img==True:
+                k+=1
+                filename = str(k)
+                filename = "0"*(5 - len(filename)) + filename
+                plt.savefig('img/img'+filename+'.png')
+            
 
             plt.pause(0.1)
 
@@ -474,7 +577,4 @@ class Visualizer(object):
             if weather_cell!=None:
                 weather_traj_history.remove()
 
-            # filename = str(k)
-            # filename = "0"*(5 - len(filename)) + filename
-            # plt.savefig('img/img'+filename+'.png')
 
