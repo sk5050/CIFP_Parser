@@ -86,11 +86,17 @@ class Plan(object):
                     new_route_graph[key] = list(set(value))
 
                 alt_route_graph = new_route_graph
-                self.augmented_plan["alternatives"].append({"airport": alt_airport,
-                                                            "route graph": alt_route_graph,
-                                                            "root": alt_routes[0][0],
-                                                            "terminal": alt_routes[0][-1],
-                                                            "STAR": alternative["alt-STAR"]})
+                if "alt-STAR" in alternative:
+                    self.augmented_plan["alternatives"].append({"airport": alt_airport,
+                                                                "route graph": alt_route_graph,
+                                                                "root": alt_routes[0][0],
+                                                                "terminal": alt_routes[0][-1],
+                                                                "STAR": alternative["alt-STAR"]})
+                else:
+                    self.augmented_plan["alternatives"].append({"airport": alt_airport,
+                                                                "route graph": alt_route_graph,
+                                                                "root": alt_routes[0][0],
+                                                                "terminal": alt_routes[0][-1]})
                 
 
         

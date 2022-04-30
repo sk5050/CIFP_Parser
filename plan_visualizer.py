@@ -11,6 +11,7 @@ from utils import *
 import geopy.distance
 import numpy as np
 from plan import *
+import math
 import time
 import random
 import copy
@@ -78,6 +79,15 @@ class Visualizer(object):
 
         
 
+        # xx = plt.ginput(5)
+        # print(xx)
+        # xx = [(1166371.3069008384, 1288068.3471314851), (1243076.6789218928, 1132012.5902610642), (1068505.8322532861, 1110852.4876345664)]
+        # x = []
+        # y = []
+        # for z in xx:
+        #     x.append(z[0])
+        #     y.append(z[1])
+        # self.basemap.plot(x,y, linewidth=5,MarkerSize=10)
                 
 
         if show==True:
@@ -114,6 +124,7 @@ class Visualizer(object):
 
         lat_set = []
         lon_set = []
+        
 
 
         for head_waypoint, tail_waypoints in route_graph.items():
@@ -133,6 +144,13 @@ class Visualizer(object):
                 else:
                     wp_coord = self.get_wp_coord(head_waypoint)
 
+                if wp_coord==None:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
+                if wp_coord==None:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
+                
+                    
+
                 print(head_waypoint)
                 print(tail_waypoints)
                 lat.append(wp_coord[0])
@@ -144,6 +162,11 @@ class Visualizer(object):
                     wp_coord = self.get_wp_coord(tail_waypoint, airport=self.plan["destination"])
                 else:
                     wp_coord = self.get_wp_coord(tail_waypoint)
+
+                if wp_coord==None:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["origin"])
+                if wp_coord==None:
+                    wp_coord = self.get_wp_coord(head_waypoint, airport=self.plan["destination"])
 
                 lat.append(wp_coord[0])
                 lon.append(wp_coord[1])
@@ -476,7 +499,7 @@ class Visualizer(object):
 
 
 
-    def compute_traj(self, route, step_size=2):
+    def compute_traj(self, route, num_steps=30):
 
         wp_lat = []
         wp_lon = []
@@ -498,9 +521,9 @@ class Visualizer(object):
 
             coords_1 = (wp_lat[i], wp_lon[i])
             coords_2 = (wp_lat[i+1], wp_lon[i+1])
-            dist = geopy.distance.distance(coords_1, coords_2).nm
+            # dist = geopy.distance.distance(coords_1, coords_2).nm
 
-            num_steps = dist / step_size
+            # num_steps = dist / step_size
 
             traj_lat_temp = list(np.linspace(coords_1[0], coords_2[0], num_steps))
             traj_lon_temp = list(np.linspace(coords_1[1], coords_2[1], num_steps))
@@ -529,10 +552,13 @@ class Visualizer(object):
         return weather_traj
 
 
-    def simulate(self, plan, route, weather_cell=None, zoom=False,zoom_size=[-1500000,500000,-1000000,500000],save_img=False,temp_route=None):
+    def simulate(self, plan, route, weather_cell_ref=None,weather_route=None, zoom=False,zoom_size=[-1500000,500000,-1000000,500000],save_img=False,temp_route=None,add_routes_set=None):
 
-        ax = self.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300,\
-                              width=7E6, height=3E6)
+        # ax = self.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300,\
+        #                       width=7E6, height=3E6)
+
+        ax = self.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+                                 width=2E6, height=2E6)
 
 
         if temp_route!=None:
@@ -548,51 +574,58 @@ class Visualizer(object):
         traj_lat, traj_lon = self.compute_traj(route)
 
 
-        if weather_cell!=None:
-            weather_traj = self.compute_weather_traj(weather_cell)
+        if weather_cell_ref!=None:
+            weather_traj_lat, weather_traj_lon = self.compute_traj(weather_route,200)
 
 
         k=0
 
-        for lat,lon,weather_traj_cell in zip(traj_lat,traj_lon,weather_traj):
+        for lat,lon,weather_lat,weather_lon in zip(traj_lat,traj_lon,weather_traj_lat,weather_traj_lon):
+            for add_routes in add_routes_set:
+                if k==add_routes['time']:
+                    for additional_route in add_routes['routes']:
+                        self.basemap.plot(additional_route[0],additional_route[1], linewidth=5,MarkerSize=10)
+                
+                
 
-            print(lon, lat)
+            # print(lon, lat)
 
-            x,y = self.basemap(lon,lat)
+            # x,y = self.basemap(lon,lat)
 
-            traj_history = self.basemap.plot(lon,lat, 'go',latlon=True,linewidth=5,MarkerSize=15)
+            traj_history = self.basemap.plot(lon,lat, 'go',linewidth=5,MarkerSize=15)
 
-            if weather_cell!=None:
+            if weather_cell_ref!=None:
 
-                lons = [x[0] for x in weather_traj_cell]
-                lats = [x[1] for x in weather_traj_cell]
-                mlons,mlats = self.basemap(lons,lats)
-                cell = [[x,y] for x,y in zip(mlons,mlats)]
+                lons = [weather_lon+x[0] for x in weather_cell_ref]
+                lats = [weather_lat+x[1] for x in weather_cell_ref]
+                # mlons,mlats = self.basemap(lons,lats)
+                cell = [[x,y] for x,y in zip(lons,lats)]
                 p = Polygon(cell)
                 pp = PolygonPatch(p, fc='red', ec='black', alpha=0.4)
                 weather_traj_history = ax.add_patch(pp)
 
-            ref_x,ref_y = self.basemap(lon,lat)
-            xbound = [ref_x+zoom_size[0], ref_x+zoom_size[1]]
-            ybound = [ref_y+zoom_size[2], ref_y+zoom_size[3]]
-            if zoom==True:
-                ax.set_xlim(xbound)
-                ax.set_ylim(ybound)
+            # ref_x,ref_y = self.basemap(lon,lat)
+            # xbound = [ref_x+zoom_size[0], ref_x+zoom_size[1]]
+            # ybound = [ref_y+zoom_size[2], ref_y+zoom_size[3]]
+            # if zoom==True:
+            #     ax.set_xlim(xbound)
+            #     ax.set_ylim(ybound)
 
             plt.show(block=False)
 
             if save_img==True:
-                k+=1
+                # k+=1
                 filename = str(k)
                 filename = "0"*(5 - len(filename)) + filename
                 plt.savefig('img/img'+filename+'.png')
             
 
             plt.pause(0.1)
+            k+=1
 
             traj_history[0].remove()
 
-            if weather_cell!=None:
+            if weather_cell_ref!=None:
                 weather_traj_history.remove()
 
 

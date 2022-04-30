@@ -135,7 +135,7 @@ class Parser(object):
 
             airport_end_linum = find_end_linum(Lines,'airport',airport_code)
 
-            airports_scope = ["KBOS", "KJFK", "KPHL", "KIAD", "KCLT", "KATL", "KMCO"]
+            airports_scope = ["KBOS", "KMCO", "KJFK", "KPHL", "KRSW", "KMIA", "KTYS", "KATL", "KMYR", "KMGM"]
 
             # if airport_code == "KBOS" or airport_code=="KJFK" or airport_code=="KLAX" or airport_code=="KLGB" or airport_code=="KSAN":
             #     self.parse_airport(Lines[0:airport_end_linum])

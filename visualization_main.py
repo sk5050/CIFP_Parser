@@ -79,9 +79,12 @@ if __name__ == '__main__':
 
             
             "routes": [
-                ["PATSS", "NELIE", "BIZEX", "Q75", "SLOJO", "Q83", "ROYCO", "Q85", "LPERD"],
-                       ["BUZRD", "SEY", "HTO", "J174", "ORF", "J121", "CHS", "IGARY", "Q85", "LPERD"],
-                       ["BUZRD", "SEY", "HTO", "RIFLE", "J174", "SWL", "CEBEE", "WETRO", "ILM", "AR15", "HIBAC"]
+                # ["PATSS", "NELIE", "BIZEX", "Q75", "SLOJO", "Q83", "ROYCO", "Q85", "LPERD"],
+                # ["BUZRD", "SEY", "HTO", "J174", "ORF", "J121", "CHS", "IGARY", "Q85", "LPERD"],
+                # ["BUZRD", "SEY", "HTO", "RIFLE", "J174", "SWL", "CEBEE", "WETRO", "ILM", "AR15", "HIBAC"]
+                # ["PATSS", "NELIE", "BIZEX", "SLOJO", "ROYCO", "LPERD"],
+                ["SSOXS", "BUZRD", "SEY", "HTO", "CEBEE", "IGARY", "LPERD"],
+                ["SSOXS", "BUZRD", "SEY", "HTO", "CEBEE", "ILM", "HIBAC"]
                        ],
             
             "STAR":[{"STAR_id":"SNFLD1",
@@ -90,27 +93,46 @@ if __name__ == '__main__':
                       "transitions":[{"transition_id":"HIBAC"}]}],
 
 
-            "alternatives": [{"alt-airport" : "KJFK",
-                              "alt-routes" : [["SLOJO", "CAMRN"]],
+            "alternatives": [
+                # {"alt-airport" : "KJFK",
+                #               "alt-routes" : [["BIZEX", "CAMRN"]],
+                #               "alt-STAR" : [{"STAR_id":"CAMRN4",
+                #                              "transitions":[{"transition_id":"ALL"}]}]},
+                #              {"alt-airport" : "KPHL",
+                #               "alt-routes" : [["BIZEX", "JST"]],
+                #               "alt-STAR" : [{"STAR_id":"BOJID2",
+                #                              "transitions":[{"transition_id":"JST"}]}]},
+
+                             {"alt-airport" : "KJFK",
+                              "alt-routes" : [["HTO", "CAMRN"]],
                               "alt-STAR" : [{"STAR_id":"CAMRN4",
                                              "transitions":[{"transition_id":"ALL"}]}]},
-                             {"alt-airport" : "KCLT",
-                              "alt-routes" : [["CEBEE", "MAJIC"]],
-                              "alt-STAR" : [{"STAR_id":"MAJIC4",
-                                             "transitions":[{"transition_id":"LIB"}]}]},
                              {"alt-airport" : "KPHL",
-                              "alt-routes" : [["CEBEE", "JST"]],
+                              "alt-routes" : [["HTO", "JST"]],
                               "alt-STAR" : [{"STAR_id":"BOJID2",
                                              "transitions":[{"transition_id":"JST"}]}]},
-                             {"alt-airport" : "KIAD",
-                              "alt-routes" : [["CEBEE", "DORRN"]],
-                              "alt-STAR" : [{"STAR_id":"CAVLR4",
-                                             "transitions":[{"transition_id":"DORRN"}]}]}
-                             # {"alt-airport" : "KALT",
-                             #  "alt-routes" : [["CEBEE", "MAJIC"]],
-                             #  "alt-STAR" : [{"STAR_id":"MAJIC4",
-                             #                 "transitions":[{"transition_id":"LIB"}]}]}
+                             
+                             
+                             {"alt-airport" : "KRSW",
+                              "alt-routes" : [["LPERD", "JOSFF"]],
+                              "alt-STAR" : [{"STAR_id":"JOSFF5",
+                                             "transitions":[{"transition_id":"ALL"}]}]},
+                             {"alt-airport" : "KATL",
+                              "alt-routes" : [["LPERD", "CHPPR"]],
+                              "alt-STAR" : [{"STAR_id":"CHPPR1",
+                                             "transitions":[{"transition_id":""}]}]},
 
+                             
+                             {"alt-airport" : "KRSW",
+                              "alt-routes" : [["HIBAC", "JOSFF"]],
+                              "alt-STAR" : [{"STAR_id":"JOSFF5",
+                                             "transitions":[{"transition_id":"ALL"}]}]},
+                             {"alt-airport" : "KMIA",
+                              "alt-routes" : [["HIBAC", "ANNEY"]],
+                              "alt-STAR" : [{"STAR_id":"ANNEY4",
+                                             "transitions":[{"transition_id":"ALL"}]}]},
+
+                             
                              ]
 
             }
@@ -133,5 +155,5 @@ if __name__ == '__main__':
     # visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-71.002300, \
     #                           width=1.4E6, height=0.4E6)
 
-    visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300, \
-                              width=7E6, height=3E6, show=True)
+    visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+                              width=2E6, height=2E6, show=True)
