@@ -40,7 +40,7 @@ class Visualizer(object):
 
         self.draw_map(lat_0,lon_0,width,height,resolution=resolution)
 
-        self.draw_airport()
+        # self.draw_airport()
 
         if self.plan["SID"]==None:
             available_SIDs = self.find_available_SIDs(self.plan)
@@ -120,7 +120,7 @@ class Visualizer(object):
 
 
 
-    def draw_route(self,route_graph,style='kD-',alpha_val=0.4):
+    def draw_route(self,route_graph,style='ko-',alpha_val=0.8):
 
         lat_set = []
         lon_set = []
@@ -175,7 +175,7 @@ class Visualizer(object):
                 lon_set.append(lon)
 
         for lat, lon in zip(lat_set, lon_set):
-            self.basemap.plot(lon,lat, style,latlon=True,linewidth=5,MarkerSize=10,alpha=alpha_val)
+            self.basemap.plot(lon,lat, style,latlon=True,linewidth=2,MarkerSize=5,alpha=alpha_val)
 
 
 
@@ -185,16 +185,18 @@ class Visualizer(object):
         alt_airport = alternative["airport"]
 
         self.draw_alt_route(alt_airport, alternative["route graph"])
+
         
-        if "STAR" in alternative:
-            for STAR in alternative["STAR"]:
-                self.draw_STAR(airport=alternative["airport"], STAR_id=STAR["STAR_id"],\
-                               transitions=STAR["transitions"])
+        
+        # if "STAR" in alternative:
+        #     for STAR in alternative["STAR"]:
+        #         self.draw_STAR(airport=alternative["airport"], STAR_id=STAR["STAR_id"],\
+        #                        transitions=STAR["transitions"])
 
 
                 
 
-    def draw_alt_route(self,alt_airport, route_graph,style='gD-'):
+    def draw_alt_route(self,alt_airport, route_graph,style='k--'):
 
         lat_set = []
         lon_set = []
@@ -253,7 +255,9 @@ class Visualizer(object):
                 lon_set.append(lon)
 
         for lat, lon in zip(lat_set, lon_set):
-            self.basemap.plot(lon,lat, style,latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
+            self.basemap.plot(lon,lat, style,latlon=True,linewidth=2,MarkerSize=5,alpha=0.8)
+
+        self.basemap.plot(lon[-1], lat[-1], 'g*',latlon=True,linewidth=5,MarkerSize=20,alpha=1.0)
 
 
 
@@ -323,8 +327,11 @@ class Visualizer(object):
                 lat.append(wp_coord[0])
                 lon.append(wp_coord[1])
 
+            lon_simplified = [lon[0], lon[-1]]
+            lat_simplified = [lat[0], lat[-1]]
 
-            self.basemap.plot(lon,lat, 'gD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)
+            self.basemap.plot(lon_simplified,lat_simplified, 'ko-',latlon=True,linewidth=2,MarkerSize=5,alpha=0.8)
+            
 
 
 
@@ -349,10 +356,14 @@ class Visualizer(object):
 
                 wp_coord = self.get_wp_coord(wp_name,airport)
                 lat.append(wp_coord[0])
-                lon.append(wp_coord[1])        
- 
-            self.basemap.plot(lon,lat, 'rD-',latlon=True,linewidth=5,MarkerSize=10,alpha=0.4)        
+                lon.append(wp_coord[1])
 
+            lon_simplified = [lon[0], lon[-1]]
+            lat_simplified = [lat[0], lat[-1]]
+ 
+            self.basemap.plot(lon_simplified,lat_simplified, 'ko-',latlon=True,linewidth=2,MarkerSize=5,alpha=0.8)
+
+        self.basemap.plot(lon_simplified[-1], lat_simplified[-1], 'y*',latlon=True,linewidth=5,MarkerSize=20,alpha=1.0)
 
     def draw_map(self,lat_0,lon_0,width,height,resolution='h'):
 
@@ -499,7 +510,7 @@ class Visualizer(object):
 
 
 
-    def compute_traj(self, route, num_steps=30):
+    def compute_traj(self, route, step_size=10000):
 
         wp_lat = []
         wp_lon = []
@@ -522,8 +533,9 @@ class Visualizer(object):
             coords_1 = (wp_lat[i], wp_lon[i])
             coords_2 = (wp_lat[i+1], wp_lon[i+1])
             # dist = geopy.distance.distance(coords_1, coords_2).nm
+            dist = math.dist(coords_1, coords_2)
 
-            # num_steps = dist / step_size
+            num_steps = dist / step_size
 
             traj_lat_temp = list(np.linspace(coords_1[0], coords_2[0], num_steps))
             traj_lon_temp = list(np.linspace(coords_1[1], coords_2[1], num_steps))
@@ -534,7 +546,7 @@ class Visualizer(object):
         return traj_lat, traj_lon
 
 
-    def compute_weather_traj(self, weather_cell, num_steps=1000):
+    def compute_weather_traj(self, weather_cell, num_steps=1500):
 
         weather_traj = [weather_cell]
 
@@ -552,7 +564,8 @@ class Visualizer(object):
         return weather_traj
 
 
-    def simulate(self, plan, route, weather_cell_ref=None,weather_route=None, zoom=False,zoom_size=[-1500000,500000,-1000000,500000],save_img=False,temp_route=None,add_routes_set=None):
+    def simulate(self, plan, route, weather_cell_ref_1=None, weather_route_1=None,weather_cell_ref_2=None, weather_route_2=None, \
+                 zoom=False,zoom_size=[-1500000,500000,-1000000,500000],save_img=False,temp_route=None,add_routes_set=None):
 
         # ax = self.visualize_plan(plan, lat_0=42.214660, lon_0=-95.002300,\
         #                       width=7E6, height=3E6)
@@ -571,20 +584,50 @@ class Visualizer(object):
                 
 
 
-        traj_lat, traj_lon = self.compute_traj(route)
+        traj_lat, traj_lon = self.compute_traj(route, 3000)
 
 
-        if weather_cell_ref!=None:
-            weather_traj_lat, weather_traj_lon = self.compute_traj(weather_route,200)
+        # if weather_cell_ref!=None:
+        weather_traj_lat_1, weather_traj_lon_1 = self.compute_traj(weather_route_1,2350)
+        weather_traj_lat_2, weather_traj_lon_2 = self.compute_traj(weather_route_2,1450)
+
+        if len(weather_traj_lat_1) < len(traj_lat):
+            diff = len(traj_lat) - len(weather_traj_lat_1) + 100
+            weather_traj_lat_1.extend([0]*diff)
+            weather_traj_lon_1.extend([0]*diff)
+
+        if len(weather_traj_lat_2) < len(traj_lat):
+            diff = len(traj_lat) - len(weather_traj_lat_2) + 100
+            weather_traj_lat_2.extend([0]*diff)
+            weather_traj_lon_2.extend([0]*diff)
+            
 
 
         k=0
 
-        for lat,lon,weather_lat,weather_lon in zip(traj_lat,traj_lon,weather_traj_lat,weather_traj_lon):
+        for lat,lon,weather_lat_1,weather_lon_1,weather_lat_2, weather_lon_2 in \
+            zip(traj_lat,traj_lon,weather_traj_lat_1,weather_traj_lon_1,weather_traj_lat_2,weather_traj_lon_2):
+            
             for add_routes in add_routes_set:
                 if k==add_routes['time']:
                     for additional_route in add_routes['routes']:
-                        self.basemap.plot(additional_route[0],additional_route[1], linewidth=5,MarkerSize=10)
+                        route_object = self.basemap.plot(additional_route[0],additional_route[1], 'r-', linewidth=6, MarkerSize=3, alpha=0.8)
+                        add_routes['object'].append(route_object)
+
+                        # if k==50:
+                        #     xx = plt.ginput(2)
+                        #     print(xx)
+
+                if k>=add_routes['end_time']:
+                    for obj in add_routes['object']:
+                        obj[0].remove()
+                    add_routes['object'] = []
+                    for additional_route in add_routes['routes']:
+                        alpha_val = 0.5*(100 - (k*2-add_routes['end_time']))/100
+                        if alpha_val<0:
+                            alpha_val = 0.0
+                        route_object = self.basemap.plot(additional_route[0],additional_route[1], 'k-', linewidth=5, MarkerSize=3, alpha=alpha_val)
+                        add_routes['object'].append(route_object)
                 
                 
 
@@ -592,17 +635,55 @@ class Visualizer(object):
 
             # x,y = self.basemap(lon,lat)
 
-            traj_history = self.basemap.plot(lon,lat, 'go',linewidth=5,MarkerSize=15)
+            traj_history = self.basemap.plot(lon,lat, 'o', markerfacecolor="None", markeredgecolor='blue', markeredgewidth=3, markersize=12)
 
-            if weather_cell_ref!=None:
+            dx = traj_lon[k+6] - lon
+            dy = traj_lat[k+6] - lat
 
-                lons = [weather_lon+x[0] for x in weather_cell_ref]
-                lats = [weather_lat+x[1] for x in weather_cell_ref]
-                # mlons,mlats = self.basemap(lons,lats)
-                cell = [[x,y] for x,y in zip(lons,lats)]
-                p = Polygon(cell)
-                pp = PolygonPatch(p, fc='red', ec='black', alpha=0.4)
-                weather_traj_history = ax.add_patch(pp)
+            traj_arrow_history = self.basemap.quiver(x=lon, y=lat, u=dx, v=dy, linewidth=1.2, color='blue', headwidth=2, zorder=1000)
+
+            # if weather_cell_ref!=None:
+
+            if weather_traj_lon_1[k+50]!=0:
+
+                lons_1 = [weather_lon_1+x[0] for x in weather_cell_ref_1]
+                lats_1 = [weather_lat_1+x[1] for x in weather_cell_ref_1]
+                cell_1 = [[x,y] for x,y in zip(lons_1,lats_1)]
+                p_1 = Polygon(cell_1)
+                pp_1 = PolygonPatch(p_1, fc='red', ec='black', alpha=0.4)
+                weather_traj_history_1 = ax.add_patch(pp_1)
+
+            
+                lons_1_current_center = sum(lons_1) / len(weather_cell_ref_1)
+                lats_1_current_center = sum(lats_1) / len(weather_cell_ref_1)
+
+                lons_1_future_center = sum([weather_traj_lon_1[k+50]+x[0] for x in weather_cell_ref_1])/len(weather_cell_ref_1)
+                lats_1_future_center = sum([weather_traj_lat_1[k+50]+x[1] for x in weather_cell_ref_1])/len(weather_cell_ref_1)
+
+                dx = lons_1_future_center - lons_1_current_center
+                dy = lats_1_future_center - lats_1_current_center
+
+                weather_arrow_history_1 = self.basemap.quiver(x=lons_1_current_center, y=lats_1_current_center, u=dx, v=dy,linewidth=1.2, color='black', headwidth=2)
+
+
+            lons_2 = [weather_lon_2+x[0] for x in weather_cell_ref_2]
+            lats_2 = [weather_lat_2+x[1] for x in weather_cell_ref_2]
+            cell_2 = [[x,y] for x,y in zip(lons_2,lats_2)]
+            p_2 = Polygon(cell_2)
+            pp_2 = PolygonPatch(p_2, fc='red', ec='black', alpha=0.4)
+            weather_traj_history_2 = ax.add_patch(pp_2)
+
+            if weather_traj_lon_2[k+50]!=0:
+                lons_2_current_center = sum(lons_2) / len(weather_cell_ref_2)
+                lats_2_current_center = sum(lats_2) / len(weather_cell_ref_2)
+
+                lons_2_future_center = sum([weather_traj_lon_2[k+50]+x[0] for x in weather_cell_ref_2])/len(weather_cell_ref_2)
+                lats_2_future_center = sum([weather_traj_lat_2[k+50]+x[1] for x in weather_cell_ref_2])/len(weather_cell_ref_2)
+
+                dx = lons_2_future_center - lons_2_current_center
+                dy = lats_2_future_center - lats_2_current_center
+
+                weather_arrow_history_2 = self.basemap.quiver(x=lons_2_current_center, y=lats_2_current_center, u=dx, v=dy,linewidth=1.2, color='black', headwidth=2)
 
             # ref_x,ref_y = self.basemap(lon,lat)
             # xbound = [ref_x+zoom_size[0], ref_x+zoom_size[1]]
@@ -620,13 +701,29 @@ class Visualizer(object):
                 plt.savefig('img/img'+filename+'.png')
             
 
-            plt.pause(0.1)
-            k+=1
+            # if k<51:
+            #     plt.pause(0.001)
+            # else:
+            #     plt.pause(0.001)
+                
 
             traj_history[0].remove()
 
-            if weather_cell_ref!=None:
-                weather_traj_history.remove()
+            traj_arrow_history.remove()
+
+            if weather_traj_lon_1[k+50]!=0:
+                weather_arrow_history_1.remove()
+                weather_traj_history_1.remove()
+            
+            if weather_traj_lon_2[k+50]!=0:
+                weather_arrow_history_2.remove()
+
+            # if weather_cell_ref!=None:
+            
+            weather_traj_history_2.remove()
+
+            k+=1
+
 
 
 
