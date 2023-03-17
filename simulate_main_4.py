@@ -48,14 +48,14 @@ if __name__ == '__main__':
                 #               "alt-STAR" : [{"STAR_id":"BOJID2",
                 #                              "transitions":[{"transition_id":"JST"}]}]},
 
-                             {"alt-airport" : "KJFK",
-                              "alt-routes" : [["HTO", "CAMRN"]],
-                              "alt-STAR" : [{"STAR_id":"CAMRN4",
-                                             "transitions":[{"transition_id":"ALL"}]}]},
-                             {"alt-airport" : "KPHL",
-                              "alt-routes" : [["HTO", "JST"]],
-                              "alt-STAR" : [{"STAR_id":"BOJID2",
-                                             "transitions":[{"transition_id":"JST"}]}]},
+                             # {"alt-airport" : "KJFK",
+                             #  "alt-routes" : [["HTO", "CAMRN"]],
+                             #  "alt-STAR" : [{"STAR_id":"CAMRN4",
+                             #                 "transitions":[{"transition_id":"ALL"}]}]},
+                             # {"alt-airport" : "KPHL",
+                             #  "alt-routes" : [["HTO", "JST"]],
+                             #  "alt-STAR" : [{"STAR_id":"BOJID2",
+                             #                 "transitions":[{"transition_id":"JST"}]}]},
                              
                              
                              {"alt-airport" : "KRSW",

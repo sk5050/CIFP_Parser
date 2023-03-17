@@ -255,7 +255,12 @@ class Visualizer(object):
                 lon_set.append(lon)
 
         for lat, lon in zip(lat_set, lon_set):
+            # if alt_airport=="KATL":
             self.basemap.plot(lon,lat, style,latlon=True,linewidth=2,MarkerSize=5,alpha=0.8)
+            # else:
+            #     self.basemap.plot(lon,lat, 'r-',latlon=True, linewidth=6, MarkerSize=3, alpha=0.8)
+            
+            
 
         self.basemap.plot(lon[-1], lat[-1], 'g*',latlon=True,linewidth=5,MarkerSize=20,alpha=1.0)
 
@@ -698,13 +703,13 @@ class Visualizer(object):
                 # k+=1
                 filename = str(k)
                 filename = "0"*(5 - len(filename)) + filename
-                plt.savefig('img/img'+filename+'.png')
+                plt.savefig('sim_5/img'+filename+'.png')
             
 
-            # if k<51:
-            #     plt.pause(0.001)
-            # else:
-            #     plt.pause(0.001)
+            if k<51:
+                plt.pause(0.001)
+            else:
+                plt.pause(0.001)
                 
 
             traj_history[0].remove()
