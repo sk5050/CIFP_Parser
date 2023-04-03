@@ -1,0 +1,372 @@
+from __future__ import division
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection, PolyCollection
+from matplotlib.patches import Ellipse
+import matplotlib.lines as lines
+
+import math
+
+class WrongGridFormat(Exception):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "Wrong grid format. Use 0 for free region and 1 for obstacles. Use the same number of columns always"
+    
+PREFERRED_MAX_FIG_WIDTH = 12
+PREFERRED_MAX_FIG_HEIGHT = 8
+    
+class Grid(object):
+    def __init__(self, num_cols=10, num_rows=10, xy_limits=None, figsize=None):
+        self.generate_grid(num_cols, num_rows)
+
+        if not xy_limits:
+            xy_limits = (0, num_cols), (0, num_rows)
+        self.set_xy_limits(*xy_limits)
+        if not figsize:
+            figsize = self.calc_auto_figsize(xy_limits)
+        self.figsize = figsize
+        
+    @property
+    def size(self):
+        return self.grid_array.shape
+
+    def generate_grid(self, num_cols, num_rows):
+        self.grid_array = np.zeros([num_cols, num_rows])
+
+    def set_xy_limits(self, xlimits, ylimits):
+        num_cols, num_rows = self.size
+        if not isinstance(xlimits,tuple) or not len(xlimits)==2 \
+           or not isinstance(ylimits,tuple) or not len(ylimits)==2 \
+           or not xlimits[0] < xlimits[1] or not ylimits[0] < ylimits[1]:
+            raise ValueError('Specified xlimits or ylimits are not valid.')
+        self.xlimits, self.ylimits = xlimits, ylimits
+        minx, maxx = self.xlimits
+        miny, maxy = self.ylimits
+        self.cell_dimensions = (maxx-minx) / num_cols, (maxy-miny) / num_rows
+
+    def calc_auto_figsize(self, xy_limits):
+        (minx, maxx), (miny, maxy) = xy_limits
+        width, height = maxx - minx, maxy - miny
+        if width > height:
+            figsize = (PREFERRED_MAX_FIG_WIDTH, height * PREFERRED_MAX_FIG_WIDTH / width)
+        else:
+            figsize = (width * PREFERRED_MAX_FIG_HEIGHT / height, PREFERRED_MAX_FIG_HEIGHT)
+        return figsize
+
+    @classmethod
+    def create_from_file(grid_class, grid_file, xy_limits=None, figsize=None):
+        gfile = open(grid_file)
+        grid = grid_class.create_from_str(gfile.read(), xy_limits=xy_limits, figsize=figsize)
+        gfile.close()
+        return grid
+    @classmethod
+    def create_from_str(grid_class, grid_str, xy_limits=None, figsize=None):
+        lines = list(map(str.split, filter(lambda s:not s.startswith('#') and len(s)>0, map(str.strip,grid_str.split('\n')))))
+        num_rows = len(lines)
+        num_cols = len(lines[0])
+
+        for line in lines:
+            if not num_cols == len(line):
+                raise WrongGridFormat
+        grid_array = np.zeros([num_cols,num_rows])
+        for row in range(num_rows):
+            for col in range(num_cols):
+                value = lines[row][col]
+                if not value == '0' and not value =='1':
+                    raise WrongGridFormat
+                grid_array[col,num_rows-1 - row] = value
+
+        grid = grid_class(num_cols, num_rows, xy_limits, figsize)
+        grid.grid_array = grid_array
+
+        return grid
+
+    def add_random_obstacles(self, num_obs):
+        """Clear grid and add random obstacles"""
+        free_idx = list(zip(*np.where(self.grid_array == 0)))
+        num_free = len(free_idx)
+        num_obs = min(num_free, num_obs)
+        for i in range(num_obs):
+            obs_idx = np.random.randint(0, num_free-1)
+            self.grid_array[free_idx.pop(obs_idx)] = 1
+            num_free = num_free - 1
+
+    def mark_obstacle_cell(self, x, y):
+        self.grid_array[x, y] = 1
+
+    def mark_free_cell(self, x, y):
+        self.grid_array[x, y] = 0
+
+    def clear(self):
+        self.grid_array = np.zeros([self.num_cols, self.num_rows])
+
+    def get_obstacles(self):
+        return list(zip(*np.where(self.grid_array > 0)))
+
+    def cell_xy(self, ix, iy):
+        """Returns the center xy point of the cell."""
+        minx, maxx = self.xlimits
+        miny, maxy = self.ylimits
+        width, height = self.cell_dimensions
+        return minx + (ix+0.5) * width, miny + (iy+0.5) * height
+
+    def cell_verts(self, ix, iy, orientation=None):
+        width, height = self.cell_dimensions
+        x, y = self.cell_xy(ix, iy)
+        verts = [(x + ofx*0.5*width, y + ofy*0.5*height) for ofx, ofy in [(-1,-1),(-1,1),(1,1),(1,-1)]]
+        if orientation:
+            verts_new = []
+            for vert in verts:
+                x_new,y_new = self.translate(vert[0],vert[1],orientation=orientation,point=True)
+                verts_new.append((x_new,y_new))
+            verts = verts_new
+                
+        return verts
+
+    def export_to_dict(self):
+        export_dict = {}
+        export_dict['grid'] = self.grid_array.tolist()
+        return export_dict
+
+    def load_from_dict(self, grid_dict):
+        self.grid_array = np.array(grid_dict['grid'])
+
+    def draw(self, fig=None,sub_ax=None):
+        cols, rows = self.size
+        minx, maxx = self.xlimits
+        miny, maxy = self.ylimits
+
+        width, height = self.cell_dimensions
+
+        x = list(map(lambda i: minx + width*i, range(cols+1)))
+        y = list(map(lambda i: miny + height*i, range(rows+1)))
+
+        if fig==None:
+            f = plt.figure(figsize=self.figsize)
+        else:
+            f = fig
+            
+        hlines = np.column_stack(np.broadcast_arrays(x[0], y, x[-1], y))
+        vlines = np.column_stack(np.broadcast_arrays(x, y[0], x, y[-1]))
+        lines = np.concatenate([hlines, vlines]).reshape(-1, 2, 2)
+        line_collection = LineCollection(lines, color="0.7", linewidths=0.5)
+
+        if sub_ax==None:
+            ax = plt.gca()
+        else:
+            ax = sub_ax
+            
+        # ax.add_collection(line_collection)
+        # ax.set_xlim(x[0]-1, x[-1]+1)
+        # ax.set_ylim(y[0]-1, y[-1]+1)
+
+        if sub_ax==None:
+            plt.gca().set_aspect('equal', adjustable='box')
+        else:
+            ax.set_aspect('equal', adjustable='box')
+        ax.axis('off')
+        self.draw_obstacles(plt.gca())
+
+        if sub_ax==None:
+            return plt.gca()
+        else:
+            return ax
+
+    def draw_obstacles(self, axes):
+        verts = [self.cell_verts(ix, iy) for ix,iy in self.get_obstacles()]
+        collection_recs = PolyCollection(verts, facecolors='r')
+        axes.add_collection(collection_recs)
+
+    def draw_cell_circle(self, axes, xy, size=0.5, color='r',orientation=None):
+        ix, iy = xy
+        x, y = self.cell_xy(ix, iy)
+        if orientation:
+            x,y=self.translate(x,y,orientation,point=True)
+        # xr, yr = size * self.cell_dimensions[0], size * self.cell_dimensions[1]
+        xr, yr = size, size
+        axes.add_patch(Ellipse((x,y), xr, yr, color=color))
+
+
+    def draw_cell_circle_2(self, axes, xy, size=0.5, **kwargs):
+        ix, iy = xy
+        x, y = self.cell_xy(ix, iy)
+        xr, yr = size * self.cell_dimensions[0], size * self.cell_dimensions[1]
+        return axes.add_patch(Ellipse((x,y), xr, yr, **kwargs))
+
+    def draw_arrow(self, axes, xy, action, length,head_width, **kwargs):
+        ix, iy = xy
+        x, y = self.cell_xy(ix, iy)
+        if action=="R":
+            direction = [0, 1]
+        elif action=="L":
+            direction = [0, -1]
+        elif action=="U":
+            direction = [1, 0]
+        elif action=="D":
+            direction = [-1, 0]
+        else:
+            return None
+        axes.arrow(x,y,direction[0]*length,direction[1]*length, head_width=head_width, **kwargs)
+
+    def draw_path(self, axes, path, *args, **kwargs):
+        xy_coords = list(map(lambda idx: self.cell_xy(*idx), path))
+        xx, yy = list(zip(*xy_coords))
+        return axes.plot(xx, yy, *args, **kwargs)
+
+
+
+    def draw_path_2(self, axes, path, lw=2, color='blue',orientation=None):
+        xy_coords = list(map(lambda idx: self.cell_xy(*idx), path))
+        xx, yy = list(zip(*xy_coords))
+
+        if orientation:
+            xx,yy = self.translate(xx,yy,orientation)
+        
+        line = lines.Line2D(xx, yy,
+                            lw = lw, color=color,
+                            axes = axes, alpha = 1)
+
+        return axes.add_line(line)
+
+
+
+    def draw_path_3(self, axes, xy, off_1,off_2, lw=2, color='blue',orientation=None):
+
+        x,y = self.translate(xy[0],xy[1],orientation,point=True)
+        xx = [x+off_1[0], x+off_2[0]]
+        yy = [y+off_1[1], y+off_2[1]]
+        path = [[xx[0],yy[0]], [xx[1],yy[1]]]
+        xy_coords = list(map(lambda idx: self.cell_xy(*idx), path))
+        xx, yy = list(zip(*xy_coords))
+
+        line = lines.Line2D(xx, yy,
+                            lw = lw, color=color,
+                            axes = axes, alpha = 1)
+
+        return axes.add_line(line)
+
+
+
+    def get_path(self, axes, xy, off_1,off_2, lw=2, color='blue',orientation=None):
+
+        x,y = self.translate(xy[0],xy[1],orientation,point=True)
+        xx = [x+off_1[0], x+off_2[0]]
+        yy = [y+off_1[1], y+off_2[1]]
+        path = [[xx[0],yy[0]], [xx[1],yy[1]]]
+        xy_coords = list(map(lambda idx: self.cell_xy(*idx), path))
+        xx, yy = list(zip(*xy_coords))
+
+        return xx, yy
+        
+
+    def draw_cell(self, axes, cell, offset=[0,0], orientation=None, return_center=False):
+        collections = []
+        x_center = 0
+        y_center = 0
+        for cell_point in cell:
+            vert = [self.cell_verts(cell_point[0][0]+offset[0],\
+                                    cell_point[0][1]+offset[1],\
+                                    orientation)]
+            collection_rec = PolyCollection(vert, facecolors='r', alpha=cell_point[1])
+            collections.append(axes.add_collection(collection_rec))
+            x_center += cell_point[0][0]
+            y_center += cell_point[0][1]
+
+        x_center /= len(cell)
+        y_center /= len(cell)
+        x_center,y_center = self.translate(x_center+offset[0],y_center+offset[1],orientation,point=True)
+
+        if return_center==True:
+            return collections, x_center, y_center
+        else:
+            return collections
+
+
+
+    def draw_cell_2(self, axes, cell, offset=[0,0],offset_2=None, orientation=None, return_center=False):
+        collections = []
+        x_center = 0
+        y_center = 0
+        for cell_point in cell:
+            vert = [self.cell_verts(cell_point[0][0]+offset[0],\
+                                    cell_point[0][1]+offset[1],\
+                                    orientation)]
+            vert_new = []
+            # print(vert)
+            # print("==================")
+            for v in vert[0]:
+                # print(v)
+                vert_new.append((v[0]+offset_2[0],v[1]+offset_2[1]))
+            vert = [vert_new]
+            collection_rec = PolyCollection(vert, facecolors='r', alpha=cell_point[1])
+            collections.append(axes.add_collection(collection_rec))
+            x_center += cell_point[0][0]
+            y_center += cell_point[0][1]
+
+        x_center /= len(cell)
+        y_center /= len(cell)
+        x_center,y_center = self.translate(x_center+offset[0],y_center+offset[1],orientation,point=True)
+
+        if return_center==True:
+            return collections, x_center+offset_2[0], y_center+offset_2[1]
+        else:
+            return collections
+
+
+    def translate(self,xx,yy,orientation,point=False):
+        
+        x_1_prev = orientation[0][0][0]
+        x_2_prev = orientation[0][1][0]
+        y_1_prev = orientation[0][0][1]
+        y_2_prev = orientation[0][1][1]
+
+        x_1_new = orientation[1][0][0]
+        x_2_new = orientation[1][1][0]
+        y_1_new = orientation[1][0][1]
+        y_2_new = orientation[1][1][1]
+
+        vec_a = [x_2_prev - x_1_prev, y_2_prev - y_1_prev]
+
+        if point==True:
+            xx = [xx]
+            yy = [yy]
+
+        xx_new = []
+        yy_new = []
+        
+        for x,y in zip(xx,yy):
+            vec_b = [x-x_1_prev, y-y_1_prev]
+            vec_a_len = math.sqrt(vec_a[0]**2 + vec_a[1]**2)
+            vec_b_len = math.sqrt(vec_b[0]**2 + vec_b[1]**2)
+
+            scale = vec_b_len / vec_a_len
+
+            dot_prod = sum([i*j for (i, j) in zip(vec_a,vec_b)])
+            # angle = math.acos(dot_prod/(vec_a_len*vec_b_len))
+
+            # math.atan2( a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y );
+            angle = math.atan2( vec_a[0]*vec_b[1] - vec_a[1]*vec_b[1], vec_a[0]*vec_b[0] + vec_a[1]*vec_b[1] )
+
+            new_total_len = math.sqrt((x_2_new-x_1_new)**2 + (y_2_new-y_1_new)**2)
+            new_len = new_total_len*scale
+            
+            p_x = x_2_new - x_1_new
+            p_y = y_2_new - y_1_new
+
+            p_x = p_x/new_total_len * new_len
+            p_y = p_y/new_total_len * new_len
+
+            new_x = x_1_new + p_x*math.cos(angle) - p_y*math.sin(angle)
+            new_y = y_1_new + p_x*math.sin(angle) + p_y*math.cos(angle)
+            
+            xx_new.append(new_x)
+            yy_new.append(new_y)
+            
+
+        if point==True:
+            return xx_new[0], yy_new[0]
+        else:
+            return xx_new, yy_new
+
+

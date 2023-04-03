@@ -81,12 +81,10 @@ if __name__ == '__main__':
 
             
             "routes": [
-                # ["PATSS", "NELIE", "BIZEX", "Q75", "SLOJO", "Q83", "ROYCO", "Q85", "LPERD"],
-                # ["BUZRD", "SEY", "HTO", "J174", "ORF", "J121", "CHS", "IGARY", "Q85", "LPERD"],
-                # ["BUZRD", "SEY", "HTO", "RIFLE", "J174", "SWL", "CEBEE", "WETRO", "ILM", "AR15", "HIBAC"]
-                # ["PATSS", "NELIE", "BIZEX", "SLOJO", "ROYCO", "LPERD"],
-                ["SSOXS", "BUZRD", "SEY", "HTO", "CEBEE", "IGARY", "LPERD"],
-                ["SSOXS", "BUZRD", "SEY", "HTO", "CEBEE", "ILM", "HIBAC"]
+                # ["SSOXS", "BUZRD", "SEY", "HTO", "CEBEE", "IGARY", "LPERD"],
+                # ["SSOXS", "BUZRD", "SEY", "HTO", "CEBEE", "ILM", "HIBAC"]
+                ["SSOXS", "BUZRD", "SEY", "HTO", "wp1", "wp2", "wp3"],
+                # ["SSOXS", "BUZRD", "SEY", "HTO", "wp1", "wp4", "HIBAC"]
                        ],
             
             "STAR":[{"STAR_id":"SNFLD1",
@@ -144,22 +142,137 @@ if __name__ == '__main__':
 
     
 
-    print(json.dumps(plan, sort_keys=True, indent=4))
-
-    # raise ValueError(123)
+    # print(json.dumps(plan, sort_keys=True, indent=4))
 
     plan = Plan(plan,CIFP_parsed_filename)
-    print(json.dumps(plan.augmented_plan, sort_keys=True, indent=4))
+    # print(json.dumps(plan.augmented_plan, sort_keys=True, indent=4))
 
-    # raise ValueError(123)
-
-    
     # visualizer.visualize_plan(plan, lat_0=42.214660, lon_0=-71.002300, \
     #                           width=1.4E6, height=0.4E6)
 
+    custom_wps = {'wp1':(940092.1658986174, 1203734.1153470196),
+                  'wp2':(812859.5547806831, 903440.4533884865),
+                  'wp3':(685626.9436627489, 603146.7914299534),
+                  'wp4':(1013419.3548387098, 824516.1290322589)}
 
+    visualizer.custom_wps = custom_wps
+
+    # orientation = [[(x_1_prev, y_1_prev), (x_2_prev, y_2_prev)],
+    #                [(x_1_new, y_1_new), (x_2_new, y_2_new)]]
+
+    
+    
+
+    # point = plt.ginput(2)
+    # print(point)
+    # plt.pause(10000)
+
+
+    # single segment
+
+    fig, axs = plt.subplots(ncols=1, nrows=1,figsize=(8,10))
+
+    visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+                              width=2E6, height=2E6, show=True, ax=axs)
+    
+    axs.set_xlim(754580.6451612904, 987096.7741935486)
+    axs.set_ylim(896421, 1211110)
+
+    # static
+    visualizer.draw_single_segment_policy_static(fig,axs, \
+                                                 orientation=[[(0.5,15.5),(29.5,15.5)], \
+                                                              [custom_wps['wp1'], \
+                                                               custom_wps['wp2']]])
+
+    # dynamic
+    # visualizer.draw_single_segment_policy_dynamic(fig,axs, show=False,save_img=True,\
+    #                                               orientation=[[(0.5,15.5),(29.5,15.5)], \
+    #                                                            [custom_wps['wp1'], \
+    #                                                             custom_wps['wp2']]])
+
+
+
+
+
+    # two segment static
+    
+    # fig, axs = plt.subplots(ncols=1, nrows=2,figsize=(10,15))
+
+    # visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+    #                           width=2E6, height=2E6, show=True, ax=axs[0])
+
+    # visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+    #                           width=2E6, height=2E6, show=True, ax=axs[1])
+    
+    # axs[0].set_xlim(606405, 1011240)
+    # axs[0].set_ylim(896421, 1211110)
+    # axs[1].set_xlim(606405, 1011240)
+    # axs[1].set_ylim(590661, 916805)
+
+    # orientation = [[[(0.5,15.5),(29.5,15.5)], \
+    #                 [custom_wps['wp1'], \
+    #                  custom_wps['wp2']]],
+    #                [[(0.5,15.5),(29.5,15.5)], \
+    #                 [custom_wps['wp2'], \
+    #                  custom_wps['wp3']]]]
+
+    # visualizer.draw_two_segments_policies_static(fig,axs,orientation=orientation)
 
     
 
-    visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
-                              width=2E6, height=2E6, show=True)
+
+    # two segment w/o estimation
+    
+    # fig, axs = plt.subplots(ncols=1, nrows=2,figsize=(10,15))
+
+    # visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+    #                           width=2E6, height=2E6, show=True, ax=axs[0])
+
+    # visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+    #                           width=2E6, height=2E6, show=True, ax=axs[1])
+    
+    # axs[0].set_xlim(606405, 1011240)
+    # axs[0].set_ylim(896421, 1211110)
+    # axs[1].set_xlim(606405, 1111240)
+    # axs[1].set_ylim(520661, 916805)
+
+    # orientation = [[[(0.5,15.5),(29.5,15.5)], \
+    #                 [custom_wps['wp1'], \
+    #                  custom_wps['wp2']]],
+    #                [[(0.5,15.5),(29.5,15.5)], \
+    #                 [custom_wps['wp2'], \
+    #                  custom_wps['wp3']]]]
+
+    # visualizer.draw_two_segments_policies_dynamic_wo_estimation(fig,axs, show=False,save_img=True,\
+    #                                                             orientation=orientation)
+
+
+
+
+
+    # two segment w/ estimation
+    
+    # fig, axs = plt.subplots(ncols=1, nrows=2,figsize=(10,15))
+
+    # visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+    #                           width=2E6, height=2E6, show=True, ax=axs[0])
+
+    # visualizer.visualize_plan(plan, lat_0=34.214660, lon_0=-78.002300, \
+    #                           width=2E6, height=2E6, show=True, ax=axs[1])
+    
+    # axs[0].set_xlim(606405, 1011240)
+    # axs[0].set_ylim(896421, 1211110)
+    # axs[1].set_xlim(606405, 1111240)
+    # axs[1].set_ylim(520661, 916805)
+
+    # orientation = [[[(0.5,15.5),(29.5,15.5)], \
+    #                 [custom_wps['wp1'], \
+    #                  custom_wps['wp2']]],
+    #                [[(0.5,15.5),(29.5,15.5)], \
+    #                 [custom_wps['wp2'], \
+    #                  custom_wps['wp3']]]]
+
+    # visualizer.draw_two_segments_policies_dynamic_w_estimation(fig,axs, show=False,save_img=True,\
+    #                                                             orientation=orientation)
+
+    
