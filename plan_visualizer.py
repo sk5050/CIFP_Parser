@@ -71,22 +71,22 @@ class Visualizer(object):
             
         # self.draw_airport()
 
-        if self.plan["SID"]==None:
-            available_SIDs = self.find_available_SIDs(self.plan)
-        else:
-            for SID in self.plan["SID"]:
-                self.draw_SID(airport=self.plan["origin"], SID_id=SID["SID_id"],\
-                              transitions=SID["transitions"],ax=ax)
+        # if self.plan["SID"]==None:
+        #     available_SIDs = self.find_available_SIDs(self.plan)
+        # else:
+        #     for SID in self.plan["SID"]:
+        #         self.draw_SID(airport=self.plan["origin"], SID_id=SID["SID_id"],\
+        #                       transitions=SID["transitions"],ax=ax)
             
             # self.draw_SID(airport=self.plan["origin"], SID_id=self.plan["SID"]["SID_id"],\
             #               transitions=self.plan["SID"]["transitions"])
 
-        self.draw_route(self.plan["route graph"])
+        # self.draw_route(self.plan["route graph"])
 
 
-        if "alternatives" in self.plan:
-            for alternative in self.plan["alternatives"]:
-                self.draw_alternatives(alternative)
+        # if "alternatives" in self.plan:
+        #     for alternative in self.plan["alternatives"]:
+        #         self.draw_alternatives(alternative)
 
         # if "alt route graph" in self.plan:
         #     self.draw_alt_route(self.plan["alt route graph"],style='kD-')
@@ -94,16 +94,16 @@ class Visualizer(object):
         # if "alt route 2 graph" in self.plan:
         #     self.draw_alt_route(self.plan["alt route 2 graph"])
             
-        if "planned route graph" in self.plan:
-            self.draw_route(self.plan["planned route graph"],style='bD-',alpha_val=0.8)
+        # if "planned route graph" in self.plan:
+        #     self.draw_route(self.plan["planned route graph"],style='bD-',alpha_val=0.8)
 
-        if self.plan["STAR"]==None:
-            available_STARs = self.find_available_STARs(self.plan)
-        else:
-            for STAR in self.plan["STAR"]:
-                print(STAR)
-                self.draw_STAR(airport=self.plan["destination"], STAR_id=STAR["STAR_id"],\
-                              transitions=STAR["transitions"])
+        # if self.plan["STAR"]==None:
+        #     available_STARs = self.find_available_STARs(self.plan)
+        # else:
+        #     for STAR in self.plan["STAR"]:
+        #         print(STAR)
+        #         self.draw_STAR(airport=self.plan["destination"], STAR_id=STAR["STAR_id"],\
+        #                       transitions=STAR["transitions"])
 
 
         
@@ -1255,7 +1255,9 @@ class Visualizer(object):
 
         for i in range(30):
 
-            trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/two_segments_3/' + 'seg_1_policy_sim_' + str(i)  + '.json'
+            # trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/two_segments_3/' + 'seg_1_policy_sim_' + str(i)  + '.json'
+            # trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol4/' + 'wp1-wp2_policy_sim_' + str(i)  + '.json'
+            trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol2/' + 'wp2-wp3_policy_sim_' + str(i)  + '.json'
 
             trajectory_txt = open(trajectory_file)
             trajectory_data = trajectory_txt.read()
@@ -1320,7 +1322,9 @@ class Visualizer(object):
 
         for i in range(30):
 
-            trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/two_segments_3/' + 'seg_2_policy_sim_' + str(i)  + '.json'
+            # trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/two_segments_3/' + 'seg_2_policy_sim_' + str(i)  + '.json'
+            # trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol4/' + 'wp2-wp3_policy_sim_' + str(i)  + '.json'
+            trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol2/' + 'wp3-wp4_policy_sim_' + str(i)  + '.json'
 
             trajectory_txt = open(trajectory_file)
             trajectory_data = trajectory_txt.read()
@@ -1949,8 +1953,11 @@ class Visualizer(object):
         global_save_img = True
 
 
-        trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'policy_sim_1.json'
-        cell_trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'cell_sim_1.json'
+        # trajectory_file = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'policy_sim_1.json'
+        # cell_trajectory_file = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'cell_sim_1.json'
+
+        trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol2/wp2-wp3_' + 'policy_sim_1.json'
+        cell_trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol2/wp2-wp3_' + 'cell_sim_1.json'
         plots = self.simulate_initial_part(fig,ax,orientation,trajectory_file,cell_trajectory_file)
 
 
@@ -2002,8 +2009,10 @@ class Visualizer(object):
 
 
         ## simulate policy for first segment
-        trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'policy_sim_1.json'
-        cell_trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'cell_sim_1.json'
+        # trajectory_file = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'policy_sim_1.json'
+        # cell_trajectory_file = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'cell_sim_1.json'
+        trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp2-wp3_' + 'policy_sim_1.json'
+        cell_trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp2-wp3_' + 'cell_sim_1.json'
         self.simulate_policy(fig,ax,orientation,trajectory_file,cell_trajectory_file)
 
 
@@ -2017,25 +2026,33 @@ class Visualizer(object):
 
         ## new sol for second segments
         plots = []
-        trajectory_file_head = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/second_segment/policy_sim_'
+        trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/second_segment/policy_sim_'
+        trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp3-wp4_' + 'policy_sim_'
         current_orientation = orientation[1]
         plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
 
         text_loc = (1106451.6129032257, 816129.0322580657)
-        text = plt.text(text_loc[0], text_loc[1], "Policy Updated For Next Segment.", fontsize=16)
+        # text = plt.text(text_loc[0], text_loc[1], "Policy Updated For Next Segment.", fontsize=16)
 
         if global_save_img==True:
             for i in range(6):
                     filename = str(global_k)
                     filename = "0"*(5 - len(filename)) + filename
-                    plt.savefig('figures/hierarchical/img'+filename+'.png')
+                    plt.savefig('figures/hierarchical_wo_text/img'+filename+'.png')
                     global_k+=1
         
         text.remove()
 
         ## simulate policy for second segment
-        trajectory_file = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/second_segment/policy_sim_0.json'
-        self.simulate_second_policy(fig,ax,orientation,trajectory_file)
+        # trajectory_file = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/second_segment/policy_sim_0.json'
+        # trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp3-wp4_policy_sim_0.json'
+        # self.simulate_second_policy(fig,ax,orientation,trajectory_file)
+
+
+
+        trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp3-wp4_' + 'policy_sim_1.json'
+        cell_trajectory_file = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/cell_sim.json'
+        self.simulate_policy(fig,ax,orientation,trajectory_file,cell_trajectory_file)
 
 
         
@@ -2046,7 +2063,7 @@ class Visualizer(object):
 
     def draw_single_segment_policy_for_hierarchical(self,fig,ax,orientation=None,trajectory_file_head=None):
 
-        test_grid = Grid(30, 50)
+        test_grid = Grid(15, 18)
         axes = test_grid.draw(fig,ax)
 
         failed_grid = dict()
@@ -2210,7 +2227,7 @@ class Visualizer(object):
 
                 filename = str(global_k)
                 filename = "0"*(5 - len(filename)) + filename
-                plt.savefig('figures/hierarchical/img'+filename+'.png')
+                plt.savefig('figures/hierarchical_wo_text/img'+filename+'.png')
                 global_k+=1
 
 
@@ -2297,7 +2314,7 @@ class Visualizer(object):
 
                 filename = str(global_k)
                 filename = "0"*(5 - len(filename)) + filename
-                plt.savefig('figures/hierarchical/img'+filename+'.png')
+                plt.savefig('figures/hierarchical_wo_text/img'+filename+'.png')
                 global_k+=1
 
 
@@ -2334,7 +2351,7 @@ class Visualizer(object):
         #################################################
 
 
-        test_grid = Grid(30, 50)
+        test_grid = Grid(15, 18)
         axes = test_grid.draw(fig,ax)
 
         trajectory_txt = open(trajectory_file)
@@ -2385,13 +2402,13 @@ class Visualizer(object):
             second_cell_y = second_cell_y_off[i]
 
 
-            current_path_plot.append(test_grid.draw_path_3(axes,[0.5,15.5], \
+            current_path_plot.append(test_grid.draw_path_3(axes,[1.5,7.5], \
                                                                [ac_x_off[i],ac_y_off[i]], \
                                                                [ac_x_off[i+1],ac_y_off[i+1]],\
                                                                lw=3, color='red',\
                                                                orientation=orientation[0]))
 
-            xx,yy = test_grid.get_path(axes,[0.5,15.5], \
+            xx,yy = test_grid.get_path(axes,[1.5,7.5], \
                                        [ac_x_off[i],ac_y_off[i]], \
                                        [ac_x_off[i+1],ac_y_off[i+1]],\
                                        lw=3, color='red',\
@@ -2406,28 +2423,35 @@ class Visualizer(object):
 
 
 
-            cell_plot,x_center, y_center = test_grid.draw_cell_2(axes,initial_first_cell, \
-                                                                 offset_2=[first_cell_x,first_cell_y],\
-                                                                 orientation=orientation[0],return_center=True)
+            if i<2:
+                cell_plot = []
+                c_2 = []
+                weather_arrow_history_1 = None
+                weather_arrow_history_2 = None
+            else:
+                
+                cell_plot,x_center, y_center = test_grid.draw_cell_2(axes,initial_first_cell, \
+                                                                     offset_2=[first_cell_x,first_cell_y],\
+                                                                     orientation=orientation[0],return_center=True)
 
-            if draw_arrow==True:
-                weather_arrow_history_1 = self.basemap.quiver(x=x_center,\
-                                                              y=y_center, \
-                                                              u=-17, v=87,linewidth=1.2, \
-                                                              color='black', headwidth=2)
+                if draw_arrow==True:
+                    weather_arrow_history_1 = self.basemap.quiver(x=x_center,\
+                                                                  y=y_center, \
+                                                                  u=-17, v=87,linewidth=1.2, \
+                                                                  color='black', headwidth=2)
 
 
 
-            ## draw cell for next segment
-            c_2,x_center,y_center = test_grid.draw_cell_2(axes,initial_second_cell,\
-                                                          offset_2=[second_cell_x,second_cell_y],\
-                                                          orientation=orientation[1],return_center=True)
-            
-            if draw_arrow==True:
-                weather_arrow_history_2 = self.basemap.quiver(x=x_center,\
-                                                              y=y_center, \
-                                                              u=-43, v=43,linewidth=1.2, \
-                                                              color='black', headwidth=2)
+                ## draw cell for next segment
+                c_2,x_center,y_center = test_grid.draw_cell_2(axes,initial_second_cell,\
+                                                              offset_2=[second_cell_x,second_cell_y],\
+                                                              orientation=orientation[1],return_center=True)
+
+                if draw_arrow==True:
+                    weather_arrow_history_2 = self.basemap.quiver(x=x_center,\
+                                                                  y=y_center, \
+                                                                  u=-43, v=43,linewidth=1.2, \
+                                                                  color='black', headwidth=2)
 
 
             # path1 = plt.ginput(5)
@@ -2442,19 +2466,34 @@ class Visualizer(object):
 
             if i==2:
                 text_loc = (1106451.6129032257, 816129.0322580657)
-                text = plt.text(text_loc[0], text_loc[1], "Convective Weather Cells Detected.", fontsize=16)
+                # text = plt.text(text_loc[0], text_loc[1], "Convective Weather Cells Detected.", fontsize=16)
 
                 plt.pause(6)
 
 
+            # points = plt.ginput(2)
+            # print(points)
+            
 
-            if i==6:
+            if i==3:
                 ## sol 1
                 plots = []
-                trajectory_file_head = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol1/wp1-wp4_' + 'policy_sim_'
-                current_orientation = orientation[0]
+                # # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol1/wp1-wp4_' + 'policy_sim_'
+                # trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol1/wp2-wp5_' + 'policy_sim_'
+                
+                # current_orientation = orientation[2]
+                # plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
+                # # text = plt.text(text_loc[0], text_loc[1], "Hierarchical Policy Found.", fontsize=16)
+
+
+                # trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol1/wp2-wp5_' + 'policy_sim_'
+                # current_orientation = orientation[2]
+                # plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
+
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp2-wp3_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol1/wp5-wp6_' + 'policy_sim_'
+                current_orientation = orientation[3]
                 plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
-                text = plt.text(text_loc[0], text_loc[1], "Hierarchical Policy Found.", fontsize=16)
 
                 route_1[0].remove()
                 route_2[0].remove()
@@ -2487,7 +2526,7 @@ class Visualizer(object):
                 
 
 
-            if i==10:
+            if i==4:
 
                 for p in plots:
                     if p!= None:
@@ -2498,14 +2537,107 @@ class Visualizer(object):
                 
                 ## sol 2
                 plots = []
-                trajectory_file_head = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'policy_sim_'
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp1-wp2_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol2/wp2-wp3_' + 'policy_sim_'
                 current_orientation = orientation[0]
                 plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
 
-                trajectory_file_head = '/home/shong/mtk/workspaces/primary/acdc/source/models/aircraft_routing/hierarchical/sol2/wp2-wp3_' + 'policy_sim_'
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol2/wp2-wp3_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol2/wp3-wp4_' + 'policy_sim_'
                 current_orientation = orientation[1]
                 plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
-                text = plt.text(text_loc[0], text_loc[1], "Policy Updated.", fontsize=16)
+                # text = plt.text(text_loc[0], text_loc[1], "Policy Updated.", fontsize=16)
+
+                route_1 = [(1485708.593816702, 1757676.946866138), (943081.0241621046, 1199870.9836547687), (688842.9320861746, 598427.1389676803), (707815.9240321394, 399210.7235350484)]
+                route_2 = [(688842.9320861746, 594632.5405784872), (556031.9884644197, 207583.50488080247)]
+
+                xx_1 = []
+                yy_1 = []
+                for point in route_1:
+                    xx_1.append(point[0])
+                    yy_1.append(point[1])
+
+                xx_2 = []
+                yy_2 = []
+                for point in route_2:
+                    xx_2.append(point[0])
+                    yy_2.append(point[1])
+
+                route_1 = ax.plot(xx_1,yy_1,'b-',linewidth=2)
+                route_2 = ax.plot(xx_2,yy_2,'b-',linewidth=2)
+
+
+                plt.pause(5)
+
+
+
+            if i==5:
+
+                for p in plots:
+                    if p!= None:
+                        p.remove()
+                
+                route_1[0].remove()
+                route_2[0].remove()
+                
+                ## sol 2
+                plots = []
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol3/wp1-wp2_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol3/wp2-wp3_' + 'policy_sim_'
+                current_orientation = orientation[0]
+                plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
+
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol3/wp2-wp3_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol3/wp3-wp4_' + 'policy_sim_'
+                current_orientation = orientation[1]
+                plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
+                # text = plt.text(text_loc[0], text_loc[1], "Policy Updated.", fontsize=16)
+
+                route_1 = [(1485708.593816702, 1757676.946866138), (943081.0241621046, 1199870.9836547687), (688842.9320861746, 598427.1389676803), (707815.9240321394, 399210.7235350484)]
+                route_2 = [(688842.9320861746, 594632.5405784872), (556031.9884644197, 207583.50488080247)]
+
+                xx_1 = []
+                yy_1 = []
+                for point in route_1:
+                    xx_1.append(point[0])
+                    yy_1.append(point[1])
+
+                xx_2 = []
+                yy_2 = []
+                for point in route_2:
+                    xx_2.append(point[0])
+                    yy_2.append(point[1])
+
+                route_1 = ax.plot(xx_1,yy_1,'b-',linewidth=2)
+                route_2 = ax.plot(xx_2,yy_2,'b-',linewidth=2)
+
+
+                plt.pause(5)
+
+
+
+
+            if i==8:
+
+                for p in plots:
+                    if p!= None:
+                        p.remove()
+                
+                route_1[0].remove()
+                route_2[0].remove()
+                
+                ## sol 2
+                plots = []
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol4/wp1-wp2_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp2-wp3_' + 'policy_sim_'
+                current_orientation = orientation[0]
+                plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
+
+                # trajectory_file_head = '/home/shong/mtk/workspaces/primary/enterprise/acdc/source/models/aircraft_routing/hierarchical/sol4/wp2-wp3_' + 'policy_sim_'
+                trajectory_file_head = '/home/shong/Documents/mission_management/scenario_1_size30/sol4/wp3-wp4_' + 'policy_sim_'
+                current_orientation = orientation[1]
+                plots.extend(self.draw_single_segment_policy_for_hierarchical(fig,ax,current_orientation,trajectory_file_head))
+                # text = plt.text(text_loc[0], text_loc[1], "Policy Updated.", fontsize=16)
 
                 route_1 = [(1485708.593816702, 1757676.946866138), (943081.0241621046, 1199870.9836547687), (688842.9320861746, 598427.1389676803), (707815.9240321394, 399210.7235350484)]
                 route_2 = [(688842.9320861746, 594632.5405784872), (556031.9884644197, 207583.50488080247)]
@@ -2540,14 +2672,14 @@ class Visualizer(object):
                     for i in range(6):
                         filename = str(global_k)
                         filename = "0"*(5 - len(filename)) + filename
-                        plt.savefig('figures/hierarchical/img'+filename+'.png')
+                        plt.savefig('figures/hierarchical_wo_text/img'+filename+'.png')
                         global_k+=1
 
                 else:
 
                     filename = str(global_k)
                     filename = "0"*(5 - len(filename)) + filename
-                    plt.savefig('figures/hierarchical/img'+filename+'.png')
+                    plt.savefig('figures/hierarchical_wo_text/img'+filename+'.png')
                     global_k+=1
 
 
@@ -2561,8 +2693,10 @@ class Visualizer(object):
                 c_.remove()
 
             if draw_arrow==True:
-                weather_arrow_history_1.remove()
-                weather_arrow_history_2.remove()
+                if weather_arrow_history_1 !=None:
+                    weather_arrow_history_1.remove()
+                if weather_arrow_history_2 !=None:
+                    weather_arrow_history_2.remove()
 
             if text!=None:
                 text.remove()
@@ -2577,7 +2711,7 @@ class Visualizer(object):
 
     def generate_head_traj(self,orientation=None,trajectory_file=None, cell_trajectory_file=None,timestep=15):
 
-        test_grid = Grid(30, 50)
+        test_grid = Grid(15, 18)
 
         trajectory_txt = open(trajectory_file)
         trajectory_data = trajectory_txt.read()
@@ -2597,7 +2731,7 @@ class Visualizer(object):
 
         ## compute ac traj
         
-        x_center,y_center = test_grid.translate(0.5,15.5,orientation[0],point=True)
+        x_center,y_center = test_grid.translate(1.5,7.5,orientation[0],point=True)
 
         ac_x_off = []
         ac_y_off = []
@@ -2662,3 +2796,4 @@ class Visualizer(object):
         return ac_x_off,ac_y_off,first_cell_x_off,first_cell_y_off,second_cell_x_off,second_cell_y_off
 
         
+
